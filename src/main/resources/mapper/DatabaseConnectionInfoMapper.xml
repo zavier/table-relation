@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.github.zavier.table.relation.dao.mapper.DatabaseConnectionInfoMapper">
+
+    <resultMap id="DatabaseConnectionInfoResultMap" type="com.github.zavier.table.relation.dao.entity.DatabaseConnectionInfo">
+        <id column="id" property="id"/>
+        <result column="db" property="db"/>
+        <result column="host" property="host"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="port" property="port"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="DatabaseConnectionInfoResultMap">
+        SELECT id, db, host, username, password, port, created_at, updated_at
+        FROM database_connection_info
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="DatabaseConnectionInfoResultMap">
+        SELECT id, db, host, username, password, port, created_at, updated_at
+        FROM database_connection_info
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO database_connection_info (db, host, username, password, port, created_at, updated_at)
+        VALUES (#{db}, #{host}, #{username}, #{password}, #{port}, #{createdAt}, #{updatedAt})
+    </insert>
+
+    <update id="update">
+        UPDATE database_connection_info
+        SET db = #{db}, host = #{host}, username = #{username}, password = #{password}, port = #{port}, created_at = #{createdAt}, updated_at = #{updatedAt}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM database_connection_info WHERE id = #{id}
+    </delete>
+
+</mapper>
