@@ -29,7 +29,7 @@ public class DataQuery {
         final String schema = queryCondition.getSchema();
         final String tableName = queryCondition.getTableName();
 
-        final Map<Column, List<Column>> referenced = tableRelationRegistry.getReferenced(schema, tableName);
+        final Map<Column, List<Column>> referenced = tableRelationRegistry.getDirectReferenced(schema, tableName);
 
         Map<String, List<Map<String, Object>>> resultMap = new HashMap<>();
         Set<Column> uniqueKey = new HashSet<>();
@@ -82,7 +82,7 @@ public class DataQuery {
                 innerCondition.setValue(valueList);
                 innerQueryCondition.setConditionList(List.of(innerCondition));
 
-                final Map<Column, List<Column>> innerReferencedMap = tableRelationRegistry.getReferenced(referencedColumn.schema(), referencedColumn.tableName());
+                final Map<Column, List<Column>> innerReferencedMap = tableRelationRegistry.getDirectReferenced(referencedColumn.schema(), referencedColumn.tableName());
                 doQuery(innerQueryCondition, innerReferencedMap, resultMap, uniqueKey);
             }
         }

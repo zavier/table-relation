@@ -1,19 +1,21 @@
 package com.github.zavier.table.relation.service;
 
+import com.github.zavier.table.relation.service.dto.EntityRelationship;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class TableRelationRegistry {
 
+    // schema -> tableName -> columns
+    private Map<String, Map<String, List<Column>>> schemaTableColumnMap = new HashMap<>();
+    // column -> referencedColumns
     private Map<Column, List<Column>> columnRelationMap = new HashMap<>();
 
-    private Map<String, Map<String, List<Column>>> schemaTableColumnMap = new HashMap<>();
+    // 暂时没有使用，本来是想用来生成ER图时体现一下关系
+    private Set<ColumnRelation> columnRelations = new HashSet<>();
 
     public void register(ColumnRelation columnRelation) {
         final Column sourceColumn = columnRelation.sourceColumn();
@@ -31,10 +33,12 @@ public class TableRelationRegistry {
         schemaTableColumnMap.computeIfAbsent(referencedColumn.schema(), k -> new HashMap<>())
                 .computeIfAbsent(referencedColumn.tableName(), k -> new ArrayList<>())
                 .add(referencedColumn);
+
+        columnRelations.add(columnRelation);
     }
 
 
-    public @NotNull Map<Column, List<Column>>  getReferenced(String schema, String tableName) {
+    public @NotNull Map<Column, List<Column>> getDirectReferenced(String schema, String tableName) {
         final Map<String, List<Column>> tableMap = schemaTableColumnMap.get(schema);
         if (tableMap == null) {
             return new HashMap<>();
@@ -51,5 +55,37 @@ public class TableRelationRegistry {
             }
         }
         return result;
+    }
+
+    public List<EntityRelationship> getAllReferenced(String schema, String tableName) {
+        final Map<Column, List<Column>> directReferenced = getDirectReferenced(schema, tableName);
+        if (directReferenced.isEmpty()) {
+            return List.of();
+        }
+        Set<Column> uniqueKey = new HashSet<>(directReferenced.keySet());
+
+        // table1, table2 , label(col1 -> col2)
+        List<EntityRelationship> relationships = new ArrayList<>();
+
+        Queue<Column> columnSet = new ArrayDeque<>();
+        columnSet.addAll(directReferenced.keySet());
+        while (!columnSet.isEmpty()) {
+            Column column = columnSet.poll();
+            final List<Column> referencedColumns = columnRelationMap.get(column);
+            if (referencedColumns.isEmpty()) {
+                continue;
+            }
+            for (Column referencedColumn : referencedColumns) {
+                if (!uniqueKey.add(referencedColumn)) {
+                    continue;
+                }
+                columnSet.add(referencedColumn);
+
+                String label = column.columnName() + " → " + referencedColumn.columnName();
+                relationships.add(new EntityRelationship(column.tableName(), referencedColumn.tableName(), label));
+            }
+        }
+
+        return relationships;
     }
 }

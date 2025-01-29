@@ -1,5 +1,6 @@
 package com.github.zavier.table.relation.service;
 
+import com.github.zavier.table.relation.service.constant.RelationType;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -15,10 +16,10 @@ public class ServiceTest {
         TableRelationRegistry relationRegistry = new TableRelationRegistry();
         Column col1 = new Column("employees", "dept_manager", "emp_no");
         Column col2 = new Column("employees", "employees", "emp_no");
-        final ColumnRelation columnRelation = new ColumnRelation(col1, col2);
+        final ColumnRelation columnRelation = new ColumnRelation(col1, col2, RelationType.ONE_TO_MANY);
         relationRegistry.register(columnRelation);
 
-        Map<Column, List<Column>> referenced = relationRegistry.getReferenced("employees", "dept_manager");
+        Map<Column, List<Column>> referenced = relationRegistry.getDirectReferenced("employees", "dept_manager");
         assertEquals(1, referenced.size());
         referenced.forEach((column, referencedColumns) -> {
             assertEquals(col1, column);
@@ -29,10 +30,10 @@ public class ServiceTest {
 
         Column col3 = new Column("employees", "dept_manager", "dept_no");
         Column col4 = new Column("employees", "departments", "dept_no");
-        final ColumnRelation columnRelation2 = new ColumnRelation(col3, col4);
+        final ColumnRelation columnRelation2 = new ColumnRelation(col3, col4, RelationType.ONE_TO_MANY);
         relationRegistry.register(columnRelation2);
 
-        referenced = relationRegistry.getReferenced("employees", "dept_manager");
+        referenced = relationRegistry.getDirectReferenced("employees", "dept_manager");
         assertEquals(2, referenced.size());
 
         final List<Column> columns = referenced.get(col3);

@@ -1,42 +1,19 @@
-package com.github.zavier.table.relation.integrate;
+package com.github.zavier.table.relation.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.zavier.table.relation.service.Column;
-import com.github.zavier.table.relation.service.ColumnRelation;
-import com.github.zavier.table.relation.service.DataSourceManager;
-import com.github.zavier.table.relation.service.TableRelationRegistry;
 import com.github.zavier.table.relation.service.constant.RelationType;
-import com.github.zavier.table.relation.service.dto.Condition;
-import com.github.zavier.table.relation.service.dto.QueryCondition;
-import com.github.zavier.table.relation.service.query.DataQuery;
-import jakarta.annotation.Resource;
+import com.github.zavier.table.relation.service.dto.EntityRelationship;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+class TableRelationRegistryTest {
 
-@SpringBootTest
-public class DataQueryIntegrateTest {
-
-    @Resource
-    private DataQuery dataQuery;
-
-    @Resource
-    private DataSourceManager dataSourceManager;
-    @Resource
-    private TableRelationRegistry tableRelationRegistry;
-
-    @Resource
-    private ObjectMapper objectMapper;
+    private TableRelationRegistry tableRelationRegistry = new TableRelationRegistry();
 
     @BeforeEach
     public void initData() {
-        dataSourceManager.addDataSource("employees", "jdbc:mysql://localhost:3306/employees", "root", "mysqlroot");
-
         Column col1 = new Column("employees", "dept_manager", "emp_no");
         Column col2 = new Column("employees", "employees", "emp_no");
         final ColumnRelation columnRelation = new ColumnRelation(col1, col2, RelationType.ONE_TO_MANY);
@@ -70,23 +47,23 @@ public class DataQueryIntegrateTest {
     }
 
     @Test
-    public void test() throws Exception {
-        initData();
+    void getDirectReferenced() {
+        final Map<Column, List<Column>> referenced = tableRelationRegistry.getDirectReferenced("employees", "dept_manager");
+        System.out.println(referenced);
+    }
 
-        QueryCondition queryCondition = new QueryCondition();
-        queryCondition.setSchema("employees");
-        queryCondition.setTableName("dept_manager");
-
-        final Condition condition = new Condition();
-        condition.setColumn("emp_no");
-        condition.setOperator("=");
-        condition.setValue("110022");
-
-        // select * from employees.employees where emp_no = '21710'
-        queryCondition.setConditionList(List.of(condition));
-
-        final Map<String, List<Map<String, Object>>> query = dataQuery.query(queryCondition);
-        assertNotNull(query);
-
+    @Test
+    void getAllReferenced() {
+        final List<EntityRelationship> allReferenced = tableRelationRegistry.getAllReferenced("employees", "dept_manager");
+        System.out.println(allReferenced);
+        String head = "erDiagram";
+        String template = "  %s ||--o{ %s : \"%s\"";
+        final StringBuilder builder = new StringBuilder(head);
+        for (EntityRelationship entityRelationship : allReferenced) {
+            final String format = String.format(template, entityRelationship.sourceTable(), entityRelationship.targetTable(), entityRelationship.label());
+            builder.append("\n")
+                    .append(format);
+        }
+        System.out.println(builder.toString());
     }
 }

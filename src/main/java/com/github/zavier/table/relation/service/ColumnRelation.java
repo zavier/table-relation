@@ -1,3 +1,5 @@
 package com.github.zavier.table.relation.service;
 
-public record ColumnRelation(Column sourceColumn, Column referencedColumn) { }
+import com.github.zavier.table.relation.service.constant.RelationType;
+
+public record ColumnRelation(Column sourceColumn, Column referencedColumn, RelationType relationType) { }
