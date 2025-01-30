@@ -1,4 +1,4 @@
-CREATE TABLE `table_relation` (
+CREATE TABLE IF NOT EXISTS `table_relation` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `table_schema` VARCHAR(64) NOT NULL COMMENT '主库名',
   `table_name` VARCHAR(64) NOT NULL COMMENT '主表名',
@@ -12,7 +12,7 @@ CREATE TABLE `table_relation` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB COMMENT='表关系';
 
-CREATE TABLE `database_connection_info` (
+CREATE TABLE IF NOT EXISTS `database_connection_info` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `database` VARCHAR(64) NOT NULL COMMENT '主库名',
   `host` VARCHAR(20) NOT NULL COMMENT 'host',

@@ -46,11 +46,11 @@ public class DataQuery {
             }
 
             final Map<Column, List<Column>> referenced =
-                    tableRelationRegistry.getDirectReferenced(currentCondition.getSchema(), currentCondition.getTableName());
-            log.info("schema:{} table:{} referenced tables:{} ", currentCondition.getSchema(), currentCondition.getTableName(),
+                    tableRelationRegistry.getDirectReferenced(currentCondition.getSchema(), currentCondition.getTable());
+            log.info("schema:{} table:{} referenced tables:{} ", currentCondition.getSchema(), currentCondition.getTable(),
                     referenced);
 
-            resultMap.put(currentCondition.getTableName(), dataMapList);
+            resultMap.put(currentCondition.getTable(), dataMapList);
             for (Map.Entry<Column, List<Column>> entry : referenced.entrySet()) {
                 final Column column = entry.getKey();
                 final String columnName = column.columnName();
@@ -75,12 +75,12 @@ public class DataQuery {
 
                     final QueryCondition innerQueryCondition = new QueryCondition();
                     innerQueryCondition.setSchema(referencedColumn.schema());
-                    innerQueryCondition.setTableName(referencedColumn.tableName());
+                    innerQueryCondition.setTable(referencedColumn.tableName());
                     final Condition innerCondition = new Condition();
-                    innerCondition.setColumn(referencedColumn.columnName());
+                    innerCondition.setField(referencedColumn.columnName());
                     innerCondition.setOperator("IN");
                     innerCondition.setValue(valueList);
-                    innerQueryCondition.setConditionList(List.of(innerCondition));
+                    innerQueryCondition.setConditions(List.of(innerCondition));
 
                     queue.add(innerQueryCondition);
                 }
@@ -97,7 +97,7 @@ public class DataQuery {
             throw new RuntimeException("dataSource not found:" + schema);
         }
         final DataSource dataSource = sourceOptional.get();
-        return sqlExecutor.execute(dataSource, queryCondition.buildSql());
+        return sqlExecutor.sqlQuery(dataSource, queryCondition.buildSql());
     }
 
 }

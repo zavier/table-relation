@@ -12,13 +12,13 @@ class QueryConditionTest {
     void buildSql() {
         QueryCondition queryCondition = new QueryCondition();
         queryCondition.setSchema("employees");
-        queryCondition.setTableName("dept_manager");
+        queryCondition.setTable("dept_manager");
 
         final Condition condition = new Condition();
-        condition.setColumn("emp_no");
+        condition.setField("emp_no");
         condition.setOperator("=");
         condition.setValue("110022");
-        queryCondition.setConditionList(List.of(condition));
+        queryCondition.setConditions(List.of(condition));
 
         final String sql = queryCondition.buildSql();
         assertEquals("select * from employees.dept_manager where emp_no = '110022'", sql);

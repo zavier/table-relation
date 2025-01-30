@@ -8,9 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class DataSourceManager {
@@ -32,6 +30,10 @@ public class DataSourceManager {
             log.error("DataSource already exists: {}", name);
             throw new RuntimeException("DataSource already exists: " + name);
         }
+    }
+
+    public List<String> getAllSchema() {
+        return new ArrayList<>(dataSourceMap.keySet());
     }
 
     public Optional<DataSource> getDataSource(String name) {

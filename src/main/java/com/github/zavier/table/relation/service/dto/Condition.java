@@ -1,17 +1,17 @@
 package com.github.zavier.table.relation.service.dto;
 
 public class Condition {
-    private String column;
+    private String field;
     // TODO enum?
     private String operator;
     private Object value;
 
-    public String getColumn() {
-        return column;
+    public String getField() {
+        return field;
     }
 
-    public void setColumn(String column) {
-        this.column = column;
+    public void setField(String field) {
+        this.field = field;
     }
 
     public String getOperator() {

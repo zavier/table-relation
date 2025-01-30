@@ -7,13 +7,13 @@ import java.util.List;
 public class QueryCondition {
 
     private String schema;
-    private String tableName;
-    private List<Condition> conditionList;
+    private String table;
+    private List<Condition> conditions;
 
     public String buildSql() {
         final String schema = this.getSchema();
-        final String tableName = this.getTableName();
-        final List<Condition> conditionList = this.getConditionList();
+        final String tableName = this.getTable();
+        final List<Condition> conditionList = this.getConditions();
 
         StringBuilder sql = new StringBuilder();
         sql.append("select * from ").append(schema).append(".").append(tableName);
@@ -21,7 +21,7 @@ public class QueryCondition {
             sql.append(" where ");
             for (int i = 0; i < conditionList.size(); i++) {
                 final Condition condition = conditionList.get(i);
-                final String column = condition.getColumn();
+                final String column = condition.getField();
                 final String operator = condition.getOperator();
                 final Object value = condition.getValue();
                 // TODO SQL注入
@@ -57,28 +57,28 @@ public class QueryCondition {
         this.schema = schema;
     }
 
-    public String getTableName() {
-        return tableName;
+    public String getTable() {
+        return table;
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
+    public void setTable(String table) {
+        this.table = table;
     }
 
-    public List<Condition> getConditionList() {
-        return conditionList;
+    public List<Condition> getConditions() {
+        return conditions;
     }
 
-    public void setConditionList(List<Condition> conditionList) {
-        this.conditionList = conditionList;
+    public void setConditions(List<Condition> conditions) {
+        this.conditions = conditions;
     }
 
     @Override
     public String toString() {
         return "QueryCondition{" +
                 "schema='" + schema + '\'' +
-                ", tableName='" + tableName + '\'' +
-                ", conditionList=" + conditionList +
+                ", tableName='" + table + '\'' +
+                ", conditionList=" + conditions +
                 '}';
     }
 }

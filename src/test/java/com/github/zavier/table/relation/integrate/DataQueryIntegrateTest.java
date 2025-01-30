@@ -71,15 +71,15 @@ public class DataQueryIntegrateTest {
     public void test() throws Exception {
         QueryCondition queryCondition = new QueryCondition();
         queryCondition.setSchema("employees");
-        queryCondition.setTableName("dept_manager");
+        queryCondition.setTable("dept_manager");
 
         final Condition condition = new Condition();
-        condition.setColumn("emp_no");
+        condition.setField("emp_no");
         condition.setOperator("=");
         condition.setValue("110022");
 
         // select * from employees.employees where emp_no = '21710'
-        queryCondition.setConditionList(List.of(condition));
+        queryCondition.setConditions(List.of(condition));
 
         System.out.println(objectMapper.writeValueAsString(queryCondition));
         final Map<String, List<Map<String, Object>>> query = dataQuery.query(queryCondition);
