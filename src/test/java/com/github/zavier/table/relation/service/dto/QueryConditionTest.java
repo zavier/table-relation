@@ -17,7 +17,7 @@ class QueryConditionTest {
         final Condition condition = new Condition();
         condition.setColumn("emp_no");
         condition.setOperator("=");
-        condition.setValue("10001");
+        condition.setValue("110022");
         queryCondition.setConditionList(List.of(condition));
 
         final String sql = queryCondition.buildSql();

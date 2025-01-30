@@ -19,18 +19,6 @@
         </encoder>
     </appender>
 
-    <!-- mybatis 本身日志 -->
-    <logger name="org.mybatis" level="DEBUG" additivity="false">
-        <appender-ref ref="FILE"/>
-        <appender-ref ref="CONSOLE"/>
-    </logger>
-
-    <!-- mybatis mapper 日志 -->
-    <logger name="com.github.zavier.table.relation.dao.mapper" level="DEBUG" additivity="false">
-        <appender-ref ref="FILE"/>
-        <appender-ref ref="CONSOLE"/>
-    </logger>
-
     <root level="INFO">
         <appender-ref ref="FILE"/>
         <appender-ref ref="CONSOLE"/>

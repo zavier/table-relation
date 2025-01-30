@@ -26,15 +26,11 @@ public class DataSourceManager {
         hikariConfig.setUsername(username);
         hikariConfig.setPassword(password);
 
-        if (dataSourceMap.containsKey(name)) {
-            log.warn("DataSource already exists: {}", name);
-            return;
-        }
-
         final HikariDataSource hikariDataSource = new HikariDataSource(hikariConfig);
         final DataSource dataSource = dataSourceMap.putIfAbsent(name, hikariDataSource);
         if (dataSource != null) {
-            log.warn("DataSource already exists: {}", name);
+            log.error("DataSource already exists: {}", name);
+            throw new RuntimeException("DataSource already exists: " + name);
         }
     }
 

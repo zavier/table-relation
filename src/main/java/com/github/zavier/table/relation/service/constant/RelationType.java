@@ -14,4 +14,13 @@ public enum RelationType {
     public int getValue() {
         return value;
     }
+
+    public static RelationType getRelationType(int value) {
+        for (RelationType relationType : RelationType.values()) {
+            if (relationType.getValue() == value) {
+                return relationType;
+            }
+        }
+        return null;
+    }
 }

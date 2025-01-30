@@ -1,10 +1,7 @@
 package com.github.zavier.table.relation.integrate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.zavier.table.relation.service.Column;
-import com.github.zavier.table.relation.service.ColumnRelation;
-import com.github.zavier.table.relation.service.DataSourceManager;
-import com.github.zavier.table.relation.service.TableRelationRegistry;
+import com.github.zavier.table.relation.service.*;
 import com.github.zavier.table.relation.service.constant.RelationType;
 import com.github.zavier.table.relation.service.dto.Condition;
 import com.github.zavier.table.relation.service.dto.QueryCondition;
@@ -72,8 +69,6 @@ public class DataQueryIntegrateTest {
 
     @Test
     public void test() throws Exception {
-        initData();
-
         QueryCondition queryCondition = new QueryCondition();
         queryCondition.setSchema("employees");
         queryCondition.setTableName("dept_manager");
@@ -86,6 +81,7 @@ public class DataQueryIntegrateTest {
         // select * from employees.employees where emp_no = '21710'
         queryCondition.setConditionList(List.of(condition));
 
+        System.out.println(objectMapper.writeValueAsString(queryCondition));
         final Map<String, List<Map<String, Object>>> query = dataQuery.query(queryCondition);
 //        System.out.println(objectMapper.writeValueAsString(query));
         assertNotNull(query);

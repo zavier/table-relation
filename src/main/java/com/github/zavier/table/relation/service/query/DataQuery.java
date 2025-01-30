@@ -26,6 +26,7 @@ public class DataQuery {
     private TableRelationRegistry tableRelationRegistry;
 
     public Map<String, List<Map<String, Object>>> query(QueryCondition queryCondition) {
+        log.info("query:{}", queryCondition);
         return queryByBfs(queryCondition);
     }
 
