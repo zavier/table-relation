@@ -26,67 +26,67 @@ public class DataQuery {
     private TableRelationRegistry tableRelationRegistry;
 
     public Map<String, List<Map<String, Object>>> query(QueryCondition queryCondition) {
-        final String schema = queryCondition.getSchema();
-        final String tableName = queryCondition.getTableName();
+        return queryByBfs(queryCondition);
+    }
 
-        final Map<Column, List<Column>> referenced = tableRelationRegistry.getDirectReferenced(schema, tableName);
+    private Map<String, List<Map<String, Object>>> queryByBfs(QueryCondition queryCondition) {
+        Queue<QueryCondition> queue = new LinkedList<>();
+        queue.add(queryCondition);
 
         Map<String, List<Map<String, Object>>> resultMap = new HashMap<>();
         Set<Column> uniqueKey = new HashSet<>();
-        doQuery(queryCondition, referenced, resultMap, uniqueKey);
 
+        while (!queue.isEmpty()) {
+            QueryCondition currentCondition = queue.poll();
+            final List<Map<String, Object>> dataMapList = executeQuery(currentCondition);
+            if (dataMapList.isEmpty()) {
+                log.warn("{} dataMapList is empty", currentCondition);
+                continue;
+            }
 
-        return resultMap;
-    }
+            final Map<Column, List<Column>> referenced =
+                    tableRelationRegistry.getDirectReferenced(currentCondition.getSchema(), currentCondition.getTableName());
+            log.info("schema:{} table:{} referenced tables:{} ", currentCondition.getSchema(), currentCondition.getTableName(),
+                    referenced);
 
-    private void doQuery(QueryCondition queryCondition,
-                         Map<Column, List<Column>> referenced,
-                         Map<String, List<Map<String, Object>>> resultMap,
-                         Set<Column> uniqueKey) {
-        final List<Map<String, Object>> dataMapList = executeQuery(queryCondition);
-        if (dataMapList.isEmpty()) {
-            log.warn("{} is empty", queryCondition);
-            return;
-        }
+            resultMap.put(currentCondition.getTableName(), dataMapList);
+            for (Map.Entry<Column, List<Column>> entry : referenced.entrySet()) {
+                final Column column = entry.getKey();
+                final String columnName = column.columnName();
 
-        resultMap.put(queryCondition.getTableName(), dataMapList);
-        for (Map.Entry<Column, List<Column>> entry : referenced.entrySet()) {
-            final Column column = entry.getKey();
-            final String columnName = column.columnName();
+                // 避免重复查询
+                uniqueKey.add(column);
 
-            // 避免重复查询
-            uniqueKey.add(column);
+                final List<Column> referencedColumns = entry.getValue();
+                for (Column referencedColumn : referencedColumns) {
+                    if (!uniqueKey.add(referencedColumn)) {
+                        continue;
+                    }
 
-            final List<Column> referencedColumns = entry.getValue();
-            for (Column referencedColumn : referencedColumns) {
-                if (!uniqueKey.add(referencedColumn)) {
-                    continue;
+                    final List<Object> valueList = dataMapList.stream()
+                            .map(dataMap -> dataMap.get(columnName))
+                            .filter(Objects::nonNull)
+                            .toList();
+                    if (valueList.isEmpty()) {
+                        log.warn("{} dataMapList col:{} valueList is empty", currentCondition, columnName);
+                        continue;
+                    }
+
+                    final QueryCondition innerQueryCondition = new QueryCondition();
+                    innerQueryCondition.setSchema(referencedColumn.schema());
+                    innerQueryCondition.setTableName(referencedColumn.tableName());
+                    final Condition innerCondition = new Condition();
+                    innerCondition.setColumn(referencedColumn.columnName());
+                    innerCondition.setOperator("IN");
+                    innerCondition.setValue(valueList);
+                    innerQueryCondition.setConditionList(List.of(innerCondition));
+
+                    queue.add(innerQueryCondition);
                 }
-
-                // TODO 优化使用 sql IN
-                final List<Object> valueList = dataMapList.stream()
-                        .map(dataMap -> dataMap.get(columnName))
-                        .filter(Objects::nonNull)
-                        .toList();
-                if (valueList.isEmpty()) {
-                    log.warn("{} dataMapList value is empty", columnName);
-                    continue;
-                }
-
-                final QueryCondition innerQueryCondition = new QueryCondition();
-                innerQueryCondition.setSchema(referencedColumn.schema());
-                innerQueryCondition.setTableName(referencedColumn.tableName());
-                final Condition innerCondition = new Condition();
-                innerCondition.setColumn(referencedColumn.columnName());
-                innerCondition.setOperator("IN");
-                innerCondition.setValue(valueList);
-                innerQueryCondition.setConditionList(List.of(innerCondition));
-
-                final Map<Column, List<Column>> innerReferencedMap = tableRelationRegistry.getDirectReferenced(referencedColumn.schema(), referencedColumn.tableName());
-                doQuery(innerQueryCondition, innerReferencedMap, resultMap, uniqueKey);
             }
         }
 
+        return resultMap;
     }
 
     private List<Map<String, Object>> executeQuery(QueryCondition queryCondition) {

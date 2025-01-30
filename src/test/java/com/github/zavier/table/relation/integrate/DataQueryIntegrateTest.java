@@ -17,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
@@ -86,7 +87,12 @@ public class DataQueryIntegrateTest {
         queryCondition.setConditionList(List.of(condition));
 
         final Map<String, List<Map<String, Object>>> query = dataQuery.query(queryCondition);
+//        System.out.println(objectMapper.writeValueAsString(query));
         assertNotNull(query);
+        assertEquals(1, query.get("dept_manager").size());
+        assertEquals(1, query.get("dept_emp").size());
+        assertEquals(1, query.get("employees").size());
+        assertEquals(1, query.get("departments").size());
 
     }
 }
