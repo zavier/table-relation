@@ -1,4 +1,4 @@
-package com.github.zavier.table.relation.service;
+package com.github.zavier.table.relation.service.domain;
 
 import com.github.zavier.table.relation.service.constant.RelationType;
 

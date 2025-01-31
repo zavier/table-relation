@@ -1,4 +1,4 @@
-package com.github.zavier.table.relation.service;
+package com.github.zavier.table.relation.service.abilty;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;

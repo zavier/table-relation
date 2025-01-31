@@ -1,5 +1,7 @@
-package com.github.zavier.table.relation.service;
+package com.github.zavier.table.relation.service.abilty;
 
+import com.github.zavier.table.relation.service.domain.Column;
+import com.github.zavier.table.relation.service.domain.ColumnRelation;
 import com.github.zavier.table.relation.service.dto.EntityRelationship;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;

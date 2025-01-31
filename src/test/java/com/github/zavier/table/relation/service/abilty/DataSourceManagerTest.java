@@ -1,6 +1,4 @@
-package com.github.zavier.table.relation.service;
-
-import org.junit.jupiter.api.Test;
+package com.github.zavier.table.relation.service.abilty;
 
 import javax.sql.DataSource;
 import java.util.Optional;

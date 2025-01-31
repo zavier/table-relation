@@ -1,13 +1,15 @@
 package com.github.zavier.table.relation.integrate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.zavier.table.relation.service.*;
+import com.github.zavier.table.relation.service.abilty.DataSourceManager;
+import com.github.zavier.table.relation.service.abilty.TableRelationRegistry;
 import com.github.zavier.table.relation.service.constant.RelationType;
+import com.github.zavier.table.relation.service.domain.Column;
+import com.github.zavier.table.relation.service.domain.ColumnRelation;
 import com.github.zavier.table.relation.service.dto.Condition;
 import com.github.zavier.table.relation.service.dto.QueryCondition;
 import com.github.zavier.table.relation.service.query.DataQuery;
 import jakarta.annotation.Resource;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -31,7 +33,7 @@ public class DataQueryIntegrateTest {
     @Resource
     private ObjectMapper objectMapper;
 
-    @BeforeEach
+//    @BeforeEach
     public void initData() {
         dataSourceManager.addDataSource("employees", "jdbc:mysql://localhost:3306/employees", "root", "mysqlroot");
 

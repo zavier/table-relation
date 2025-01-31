@@ -1,9 +1,9 @@
 package com.github.zavier.table.relation.service.query;
 
-import com.github.zavier.table.relation.service.Column;
-import com.github.zavier.table.relation.service.DataSourceManager;
-import com.github.zavier.table.relation.service.SqlExecutor;
-import com.github.zavier.table.relation.service.TableRelationRegistry;
+import com.github.zavier.table.relation.service.domain.Column;
+import com.github.zavier.table.relation.service.abilty.DataSourceManager;
+import com.github.zavier.table.relation.service.abilty.SqlExecutor;
+import com.github.zavier.table.relation.service.abilty.TableRelationRegistry;
 import com.github.zavier.table.relation.service.dto.Condition;
 import com.github.zavier.table.relation.service.dto.QueryCondition;
 import jakarta.annotation.Resource;
@@ -47,7 +47,7 @@ public class DataQuery {
 
             final Map<Column, List<Column>> referenced =
                     tableRelationRegistry.getDirectReferenced(currentCondition.getSchema(), currentCondition.getTable());
-            log.info("schema:{} table:{} referenced tables:{} ", currentCondition.getSchema(), currentCondition.getTable(),
+            log.debug("schema:{} table:{} referenced tables:{} ", currentCondition.getSchema(), currentCondition.getTable(),
                     referenced);
 
             resultMap.put(currentCondition.getTable(), dataMapList);
