@@ -3,7 +3,7 @@ package com.github.zavier.table.relation.service.abilty;
 import com.github.zavier.table.relation.service.constant.RelationType;
 import com.github.zavier.table.relation.service.domain.Column;
 import com.github.zavier.table.relation.service.domain.ColumnRelation;
-import com.github.zavier.table.relation.service.dto.EntityRelationship;
+import com.github.zavier.table.relation.service.dto.EntityRelationShip;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -56,12 +56,12 @@ class TableRelationRegistryTest {
 
     @Test
     void getAllReferenced() {
-        final List<EntityRelationship> allReferenced = tableRelationRegistry.getAllReferenced("employees", "dept_manager");
+        final List<EntityRelationShip> allReferenced = tableRelationRegistry.getAllReferenced("employees", "dept_manager");
         System.out.println(allReferenced);
         String head = "erDiagram";
         String template = "  %s ||--o{ %s : \"%s\"";
         final StringBuilder builder = new StringBuilder(head);
-        for (EntityRelationship entityRelationship : allReferenced) {
+        for (EntityRelationShip entityRelationship : allReferenced) {
             final String format = String.format(template, entityRelationship.sourceTable(), entityRelationship.targetTable(), entityRelationship.label());
             builder.append("\n")
                     .append(format);

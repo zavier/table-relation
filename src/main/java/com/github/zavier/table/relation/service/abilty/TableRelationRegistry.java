@@ -2,7 +2,7 @@ package com.github.zavier.table.relation.service.abilty;
 
 import com.github.zavier.table.relation.service.domain.Column;
 import com.github.zavier.table.relation.service.domain.ColumnRelation;
-import com.github.zavier.table.relation.service.dto.EntityRelationship;
+import com.github.zavier.table.relation.service.dto.EntityRelationShip;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
@@ -65,7 +65,7 @@ public class TableRelationRegistry {
         return result;
     }
 
-    public List<EntityRelationship> getAllReferenced(String schema, String tableName) {
+    public List<EntityRelationShip> getAllReferenced(String schema, String tableName) {
         final Map<Column, List<Column>> directReferenced = getDirectReferenced(schema, tableName);
         if (directReferenced.isEmpty()) {
             return List.of();
@@ -73,7 +73,7 @@ public class TableRelationRegistry {
         Set<Column> uniqueKey = new HashSet<>(directReferenced.keySet());
 
         // table1, table2 , label(col1 -> col2)
-        List<EntityRelationship> relationships = new ArrayList<>();
+        List<EntityRelationShip> relationships = new ArrayList<>();
 
         Queue<Column> columnSet = new ArrayDeque<>();
         columnSet.addAll(directReferenced.keySet());
@@ -90,7 +90,7 @@ public class TableRelationRegistry {
                 columnSet.add(referencedColumn);
 
                 String label = column.columnName() + " → " + referencedColumn.columnName();
-                relationships.add(new EntityRelationship(column.tableName(), referencedColumn.tableName(), label));
+                relationships.add(new EntityRelationShip(column.tableName(), referencedColumn.tableName(), label));
             }
         }
 
