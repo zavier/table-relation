@@ -18,9 +18,9 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-public class ManagerService {
+public class DataSourceManagerService {
 
-    private static final Logger log = LoggerFactory.getLogger(ManagerService.class);
+    private static final Logger log = LoggerFactory.getLogger(DataSourceManagerService.class);
 
     @Resource
     private DataSourceConfigRepository dataSourceConfigRepository;

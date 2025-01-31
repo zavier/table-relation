@@ -31,7 +31,7 @@ public class DataSourceConfigRepository {
 
     public void addDataSource(DataSourceConfig dataSourceConfig) {
         DatabaseConnectionInfo databaseConnectionInfo = new DatabaseConnectionInfo(
-                dataSourceConfig.getId(),
+                null,
                 dataSourceConfig.getDatabase(),
                 dataSourceConfig.getHost(),
                 dataSourceConfig.getUsername(),
