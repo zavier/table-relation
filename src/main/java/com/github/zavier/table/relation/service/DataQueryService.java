@@ -1,6 +1,6 @@
 package com.github.zavier.table.relation.service;
 
-import com.github.zavier.table.relation.service.abilty.DataSourceManager;
+import com.github.zavier.table.relation.service.abilty.DataSourceRegistry;
 import com.github.zavier.table.relation.service.abilty.SqlExecutor;
 import com.github.zavier.table.relation.service.dto.Condition;
 import com.github.zavier.table.relation.service.dto.QueryCondition;
@@ -21,18 +21,18 @@ public class DataQueryService {
     @Resource
     private DataQuery dataQuery;
     @Resource
-    private DataSourceManager dataSourceManager;
+    private DataSourceRegistry dataSourceRegistry;
     @Resource
     private SqlExecutor sqlExecutor;
 
     public Result<List<String>> getAllSchema() {
-        return Result.success(dataSourceManager.getAllSchema());
+        return Result.success(dataSourceRegistry.getAllSchema());
     }
 
     public Result<List<String>> getSchemaTables(String schema) {
         Validate.notBlank(schema, "schema can not be blank");
 
-        final Optional<DataSource> sourceOptional = dataSourceManager.getDataSource(schema);
+        final Optional<DataSource> sourceOptional = dataSourceRegistry.getDataSource(schema);
         if (sourceOptional.isEmpty()) {
             return Result.success(List.of());
         }
@@ -44,7 +44,7 @@ public class DataQueryService {
         Validate.notBlank(schema, "schema can not be blank");
         Validate.notBlank(tableName, "tableName can not be blank");
 
-        final Optional<DataSource> sourceOptional = dataSourceManager.getDataSource(schema);
+        final Optional<DataSource> sourceOptional = dataSourceRegistry.getDataSource(schema);
         if (sourceOptional.isEmpty()) {
             return Result.success(List.of());
         }

@@ -11,12 +11,11 @@ import javax.sql.DataSource;
 import java.util.*;
 
 @Service
-public class DataSourceManager {
+public class DataSourceRegistry {
 
-    private static final Logger log = LoggerFactory.getLogger(DataSourceManager.class);
+    private static final Logger log = LoggerFactory.getLogger(DataSourceRegistry.class);
 
     private Map<String, DataSource> dataSourceMap = new HashMap<>();
-
 
     public void addDataSource(String name, String url, String username, String password) {
         final HikariConfig hikariConfig = new HikariConfig();
@@ -39,6 +38,11 @@ public class DataSourceManager {
     public Optional<DataSource> getDataSource(String name) {
         final DataSource dataSource = dataSourceMap.get(name);
         return Optional.ofNullable(dataSource);
+    }
+
+    public void clear() {
+        destroy();
+        dataSourceMap.clear();
     }
 
     @PreDestroy

@@ -8,16 +8,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DataSourceManagerTest {
 
-    private final DataSourceManager dataSourceManager = new DataSourceManager();
+    private final DataSourceRegistry dataSourceRegistry = new DataSourceRegistry();
 
 //    @Test
     public void test() {
-        dataSourceManager.addDataSource("test", "jdbc:mysql://localhost:3306/test", "root", "mysqlroot");
+        dataSourceRegistry.addDataSource("test", "jdbc:mysql://localhost:3306/test", "root", "mysqlroot");
 
-        final Optional<DataSource> dataSourceOptional = dataSourceManager.getDataSource("test");
+        final Optional<DataSource> dataSourceOptional = dataSourceRegistry.getDataSource("test");
         assertTrue(dataSourceOptional.isPresent());
 
-        final Optional<DataSource> sourceOptional = dataSourceManager.getDataSource("aa");
+        final Optional<DataSource> sourceOptional = dataSourceRegistry.getDataSource("aa");
         assertFalse(sourceOptional.isPresent());
     }
 }

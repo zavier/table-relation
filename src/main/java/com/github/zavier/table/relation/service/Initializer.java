@@ -1,13 +1,14 @@
 package com.github.zavier.table.relation.service;
 
-import com.github.zavier.table.relation.dao.entity.DatabaseConnectionInfo;
 import com.github.zavier.table.relation.dao.entity.TableRelation;
-import com.github.zavier.table.relation.dao.mapper.DatabaseConnectionMapper;
 import com.github.zavier.table.relation.dao.mapper.TableRelationMapper;
-import com.github.zavier.table.relation.service.abilty.DataSourceManager;
+import com.github.zavier.table.relation.dao.repository.DataSourceConfigRepository;
+import com.github.zavier.table.relation.service.abilty.DataSourceRegistry;
 import com.github.zavier.table.relation.service.abilty.TableRelationRegistry;
 import com.github.zavier.table.relation.service.domain.Column;
 import com.github.zavier.table.relation.service.domain.ColumnRelation;
+import com.github.zavier.table.relation.service.dto.DataSourceConfig;
+import com.github.zavier.table.relation.utils.DataSourceUrlBuilder;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
@@ -21,14 +22,14 @@ public class Initializer {
 
     private static final Logger log = LoggerFactory.getLogger(Initializer.class);
     @Resource
-    private DataSourceManager dataSourceManager;
+    private DataSourceRegistry dataSourceRegistry;
     @Resource
     private TableRelationRegistry tableRelationRegistry;
 
     @Resource
     private TableRelationMapper tableRelationMapper;
     @Resource
-    private DatabaseConnectionMapper databaseConnectionInfoMapper;
+    private DataSourceConfigRepository dataSourceConfigRepository;
 
 
     @PostConstruct
@@ -38,11 +39,14 @@ public class Initializer {
 
     public void refresh() {
         log.info("refresh table relation");
-        final List<DatabaseConnectionInfo> databaseConnectionInfos = databaseConnectionInfoMapper.listAllDatabaseConnectionInfo();
-        databaseConnectionInfos.forEach(databaseConnectionInfo -> {
+        dataSourceRegistry.clear();
+        tableRelationRegistry.clear();
+
+        final List<DataSourceConfig> dataSourceConfigs = dataSourceConfigRepository.listAllDataSourceConfig();
+        dataSourceConfigs.forEach(dataSourceConfig -> {
             // 目前仅支持mysql
-            String jdbcUrl = String.format("jdbc:mysql://%s:%d/%s", databaseConnectionInfo.host(), databaseConnectionInfo.port(), databaseConnectionInfo.database());
-            dataSourceManager.addDataSource(databaseConnectionInfo.database(), jdbcUrl, databaseConnectionInfo.username(), databaseConnectionInfo.password());
+            final String jdbcUrl = DataSourceUrlBuilder.buildUrlForMySql(dataSourceConfig);
+            dataSourceRegistry.addDataSource(dataSourceConfig.getDatabase(), jdbcUrl, dataSourceConfig.getUsername(), dataSourceConfig.getPassword());
         });
 
         final List<TableRelation> tableRelations = tableRelationMapper.listAllTableRelation();

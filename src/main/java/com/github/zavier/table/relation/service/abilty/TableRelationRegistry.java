@@ -19,6 +19,12 @@ public class TableRelationRegistry {
     // 暂时没有使用，本来是想用来生成ER图时体现一下关系
     private Set<ColumnRelation> columnRelations = new HashSet<>();
 
+    public void clear() {
+        schemaTableColumnMap.clear();
+        columnRelationMap.clear();
+        columnRelations.clear();
+    }
+
     public void register(ColumnRelation columnRelation) {
         final Column sourceColumn = columnRelation.sourceColumn();
         final Column referencedColumn = columnRelation.referencedColumn();

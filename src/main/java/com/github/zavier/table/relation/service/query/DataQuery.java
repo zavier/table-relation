@@ -1,7 +1,7 @@
 package com.github.zavier.table.relation.service.query;
 
+import com.github.zavier.table.relation.service.abilty.DataSourceRegistry;
 import com.github.zavier.table.relation.service.domain.Column;
-import com.github.zavier.table.relation.service.abilty.DataSourceManager;
 import com.github.zavier.table.relation.service.abilty.SqlExecutor;
 import com.github.zavier.table.relation.service.abilty.TableRelationRegistry;
 import com.github.zavier.table.relation.service.dto.Condition;
@@ -19,7 +19,7 @@ public class DataQuery {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(DataQuery.class);
 
     @Resource
-    private DataSourceManager dataSourceManager;
+    private DataSourceRegistry dataSourceRegistry;
     @Resource
     private SqlExecutor sqlExecutor;
     @Resource
@@ -92,7 +92,7 @@ public class DataQuery {
 
     private List<Map<String, Object>> executeQuery(QueryCondition queryCondition) {
         final String schema = queryCondition.getSchema();
-        final Optional<DataSource> sourceOptional = dataSourceManager.getDataSource(schema);
+        final Optional<DataSource> sourceOptional = dataSourceRegistry.getDataSource(schema);
         if (sourceOptional.isEmpty()) {
             throw new RuntimeException("dataSource not found:" + schema);
         }

@@ -1,7 +1,7 @@
 package com.github.zavier.table.relation.integrate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.zavier.table.relation.service.abilty.DataSourceManager;
+import com.github.zavier.table.relation.service.abilty.DataSourceRegistry;
 import com.github.zavier.table.relation.service.abilty.TableRelationRegistry;
 import com.github.zavier.table.relation.service.constant.RelationType;
 import com.github.zavier.table.relation.service.domain.Column;
@@ -26,7 +26,7 @@ public class DataQueryIntegrateTest {
     private DataQuery dataQuery;
 
     @Resource
-    private DataSourceManager dataSourceManager;
+    private DataSourceRegistry dataSourceRegistry;
     @Resource
     private TableRelationRegistry tableRelationRegistry;
 
@@ -35,7 +35,7 @@ public class DataQueryIntegrateTest {
 
 //    @BeforeEach
     public void initData() {
-        dataSourceManager.addDataSource("employees", "jdbc:mysql://localhost:3306/employees", "root", "mysqlroot");
+        dataSourceRegistry.addDataSource("employees", "jdbc:mysql://localhost:3306/employees", "root", "mysqlroot");
 
         Column col1 = new Column("employees", "dept_manager", "emp_no");
         Column col2 = new Column("employees", "employees", "emp_no");
