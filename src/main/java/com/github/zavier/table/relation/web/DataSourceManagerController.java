@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/table/datasource")
+@RequestMapping("/api/table/datasource")
 public class DataSourceManagerController {
 
     @Resource

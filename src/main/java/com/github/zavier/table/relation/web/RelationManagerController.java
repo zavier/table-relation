@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/table/relation")
+@RequestMapping("/api/table/relation")
 public class RelationManagerController {
 
     @Resource

@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/table")
+@RequestMapping("/api/table")
 public class DataController {
     private static final Logger log = LoggerFactory.getLogger(DataController.class);
 
