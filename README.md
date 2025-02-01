@@ -68,6 +68,8 @@ java -jar target/table-relation-0.0.1-SNAPSHOT.jar
 
 ## Usage
 
+open your browser and navigate to `http://localhost:8080/table/index.html` to access the application.
+
 1. **Database Connection**: Connect to your configured database using the provided interface.
 2. **Define Relationships**: Use the web interface to define relationships between tables.
 3. **Visualize**: Generate and view visual representations of your table relationships.
