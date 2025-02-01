@@ -71,7 +71,7 @@ public class RelationManagerService {
         Validate.notBlank(columnUsage.getTableSchema(), "tableSchema can not be null");
         Validate.notBlank(columnUsage.getTableName(), "tableName can not be null");
         Validate.notBlank(columnUsage.getColumnName(), "columnName can not be null");
-        Validate.notBlank(columnUsage.getCondition(), "condition can not be null");
+        Validate.notNull(columnUsage.getCondition(), "condition can not be null");
         Validate.notBlank(columnUsage.getReferencedTableSchema(), "referencedTableSchema can not be null");
         Validate.notBlank(columnUsage.getReferencedTableName(), "referencedTableName can not be null");
         Validate.notBlank(columnUsage.getReferencedColumnName(), "referencedColumnName can not be null");
