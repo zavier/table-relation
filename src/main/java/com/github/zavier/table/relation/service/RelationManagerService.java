@@ -35,6 +35,7 @@ public class RelationManagerService {
                     .anyMatch(it -> Objects.equals(it.getTableSchema(), columnUsage.getTableSchema())
                             && Objects.equals(it.getTableName(), columnUsage.getTableName())
                             && Objects.equals(it.getColumnName(), columnUsage.getColumnName())
+                            && Objects.equals(it.getCondition(), columnUsage.getCondition())
                             && Objects.equals(it.getReferencedTableSchema(), columnUsage.getReferencedTableSchema())
                             && Objects.equals(it.getReferencedTableName(), columnUsage.getReferencedTableName())
                             && Objects.equals(it.getReferencedColumnName(), columnUsage.getReferencedColumnName())
@@ -70,6 +71,7 @@ public class RelationManagerService {
         Validate.notBlank(columnUsage.getTableSchema(), "tableSchema can not be null");
         Validate.notBlank(columnUsage.getTableName(), "tableName can not be null");
         Validate.notBlank(columnUsage.getColumnName(), "columnName can not be null");
+        Validate.notBlank(columnUsage.getCondition(), "condition can not be null");
         Validate.notBlank(columnUsage.getReferencedTableSchema(), "referencedTableSchema can not be null");
         Validate.notBlank(columnUsage.getReferencedTableName(), "referencedTableName can not be null");
         Validate.notBlank(columnUsage.getReferencedColumnName(), "referencedColumnName can not be null");

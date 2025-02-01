@@ -23,6 +23,7 @@ public class TableRelationRepository {
             columnUsage.setTableSchema(tableRelation.tableSchema());
             columnUsage.setTableName(tableRelation.tableName());
             columnUsage.setColumnName(tableRelation.columnName());
+            columnUsage.setCondition(tableRelation.condition());
             columnUsage.setReferencedTableSchema(tableRelation.referencedTableSchema());
             columnUsage.setReferencedTableName(tableRelation.referencedTableName());
             columnUsage.setReferencedColumnName(tableRelation.referencedColumnName());
@@ -37,6 +38,7 @@ public class TableRelationRepository {
                 columnUsage.getTableSchema(),
                 columnUsage.getTableName(),
                 columnUsage.getColumnName(),
+                columnUsage.getCondition(),
                 columnUsage.getReferencedTableSchema(),
                 columnUsage.getReferencedTableName(),
                 columnUsage.getReferencedColumnName(),
@@ -55,6 +57,7 @@ public class TableRelationRepository {
                 columnUsage.getTableSchema(),
                 columnUsage.getTableName(),
                 columnUsage.getColumnName(),
+                columnUsage.getCondition(),
                 columnUsage.getReferencedTableSchema(),
                 columnUsage.getReferencedTableName(),
                 columnUsage.getReferencedColumnName(),

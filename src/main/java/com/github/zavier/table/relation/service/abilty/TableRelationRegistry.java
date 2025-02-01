@@ -89,7 +89,7 @@ public class TableRelationRegistry {
                 }
                 columnSet.add(referencedColumn);
 
-                String label = column.columnName() + " → " + referencedColumn.columnName();
+                String label = column.columnName() + " → " + referencedColumn.columnName() + "(" + referencedColumn.condition() + ")";
                 relationships.add(new EntityRelationShip(column.tableName(), referencedColumn.tableName(), label));
             }
         }

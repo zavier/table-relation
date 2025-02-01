@@ -51,8 +51,8 @@ public class Initializer {
 
         final List<TableRelation> tableRelations = tableRelationMapper.listAllTableRelation();
         tableRelations.forEach(tableRelation -> {
-            Column sourceColumn = new Column(tableRelation.tableSchema(), tableRelation.tableName(), tableRelation.columnName());
-            Column relatedColumn = new Column(tableRelation.referencedTableSchema(), tableRelation.referencedTableName(), tableRelation.referencedColumnName());
+            Column sourceColumn = new Column(tableRelation.tableSchema(), tableRelation.tableName(), tableRelation.columnName(), tableRelation.condition());
+            Column relatedColumn = new Column(tableRelation.referencedTableSchema(), tableRelation.referencedTableName(), tableRelation.referencedColumnName(), "");
             final ColumnRelation columnRelation = new ColumnRelation(sourceColumn, relatedColumn, tableRelation.relationType());
             tableRelationRegistry.register(columnRelation);
         });

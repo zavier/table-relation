@@ -5,10 +5,12 @@ public class ColumnUsage {
     private String tableSchema;
     private String tableName;
     private String columnName;
+    private String condition;
     private String referencedTableSchema;
     private String referencedTableName;
     private String referencedColumnName;
     private Integer relationType;
+
 
     public Integer getId() {
         return id;
@@ -40,6 +42,14 @@ public class ColumnUsage {
 
     public void setColumnName(String columnName) {
         this.columnName = columnName;
+    }
+
+    public String getCondition() {
+        return condition;
+    }
+
+    public void setCondition(String condition) {
+        this.condition = condition;
     }
 
     public String getReferencedTableSchema() {

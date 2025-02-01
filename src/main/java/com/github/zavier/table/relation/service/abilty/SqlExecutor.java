@@ -48,7 +48,7 @@ public class SqlExecutor {
     }
 
     private String wrapLimit2Sql(String sql) {
-        return sql + " limit " + MAX_SQL_LENGTH;
+        return sql + " order by id asc limit " + MAX_SQL_LENGTH;
     }
 
     private JdbcTemplate getJdbcTemplate(DataSource dataSource) {

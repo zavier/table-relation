@@ -17,8 +17,8 @@ public class ServiceTest {
     @Test
     public void testGetTableRelation() {
         TableRelationRegistry relationRegistry = new TableRelationRegistry();
-        Column col1 = new Column("employees", "dept_manager", "emp_no");
-        Column col2 = new Column("employees", "employees", "emp_no");
+        Column col1 = new Column("employees", "dept_manager", "emp_no", "");
+        Column col2 = new Column("employees", "employees", "emp_no", "");
         final ColumnRelation columnRelation = new ColumnRelation(col1, col2, RelationType.ONE_TO_MANY);
         relationRegistry.register(columnRelation);
 
@@ -31,8 +31,8 @@ public class ServiceTest {
         });
 
 
-        Column col3 = new Column("employees", "dept_manager", "dept_no");
-        Column col4 = new Column("employees", "departments", "dept_no");
+        Column col3 = new Column("employees", "dept_manager", "dept_no", "");
+        Column col4 = new Column("employees", "departments", "dept_no", "");
         final ColumnRelation columnRelation2 = new ColumnRelation(col3, col4, RelationType.ONE_TO_MANY);
         relationRegistry.register(columnRelation2);
 

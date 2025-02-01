@@ -8,6 +8,7 @@ public record TableRelation(
         String tableSchema,
         String tableName,
         String columnName,
+        String condition,
         String referencedTableSchema,
         String referencedTableName,
         String referencedColumnName,

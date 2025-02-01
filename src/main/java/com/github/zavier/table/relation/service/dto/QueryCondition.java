@@ -1,5 +1,7 @@
 package com.github.zavier.table.relation.service.dto;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -9,6 +11,7 @@ public class QueryCondition {
     private String schema;
     private String table;
     private List<Condition> conditions;
+    private String customizeConditionSql;
 
     public String buildSql() {
         final String schema = this.getSchema();
@@ -30,6 +33,9 @@ public class QueryCondition {
                     sql.append(" and ");
                 }
             }
+        }
+        if (StringUtils.isNotBlank(this.getCustomizeConditionSql())) {
+            sql.append(" and ").append(this.getCustomizeConditionSql());
         }
         return sql.toString();
     }
@@ -73,12 +79,21 @@ public class QueryCondition {
         this.conditions = conditions;
     }
 
+    public String getCustomizeConditionSql() {
+        return customizeConditionSql;
+    }
+
+    public void setCustomizeConditionSql(String customizeConditionSql) {
+        this.customizeConditionSql = customizeConditionSql;
+    }
+
     @Override
     public String toString() {
         return "QueryCondition{" +
                 "schema='" + schema + '\'' +
-                ", tableName='" + table + '\'' +
-                ", conditionList=" + conditions +
+                ", table='" + table + '\'' +
+                ", conditions=" + conditions +
+                ", customizeConditionSql='" + customizeConditionSql + '\'' +
                 '}';
     }
 }

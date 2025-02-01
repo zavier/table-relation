@@ -7,6 +7,7 @@ import com.github.zavier.table.relation.service.abilty.TableRelationRegistry;
 import com.github.zavier.table.relation.service.dto.Condition;
 import com.github.zavier.table.relation.service.dto.QueryCondition;
 import jakarta.annotation.Resource;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
@@ -76,12 +77,16 @@ public class DataQuery {
                     final QueryCondition innerQueryCondition = new QueryCondition();
                     innerQueryCondition.setSchema(referencedColumn.schema());
                     innerQueryCondition.setTable(referencedColumn.tableName());
+
                     final Condition innerCondition = new Condition();
                     innerCondition.setField(referencedColumn.columnName());
                     innerCondition.setOperator("IN");
                     innerCondition.setValue(valueList);
                     innerQueryCondition.setConditions(List.of(innerCondition));
 
+                    if (StringUtils.isNotBlank(referencedColumn.condition())) {
+                        innerQueryCondition.setCustomizeConditionSql(referencedColumn.condition());
+                    }
                     queue.add(innerQueryCondition);
                 }
             }
