@@ -75,26 +75,21 @@ public class TableRelationRegistry {
         // table1, table2 , label(col1 -> col2)
         List<EntityRelationShip> relationships = new ArrayList<>();
 
-        Set<Column> uniqueKey = new HashSet<>();
+        Set<String> uniqueKey = new HashSet<>();
         Queue<Column> columnSet = new ArrayDeque<>(tableColumns);
         while (!columnSet.isEmpty()) {
             Column column = columnSet.poll();
-            if (!uniqueKey.add(column)) {
-                continue;
-            }
 
             final List<Column> referencedColumns = columnRelationMap.get(column);
             if (referencedColumns.isEmpty()) {
                 continue;
             }
             for (Column referencedColumn : referencedColumns) {
-                if (!uniqueKey.add(referencedColumn)) {
+                if (!uniqueKey.add(generateRelationUniqueKey(column, referencedColumn))) {
                     continue;
                 }
                 // 添加关联表的所有列
                 final List<Column> relaTableAllColumns = getTableAllColumns(referencedColumn.schema(), referencedColumn.tableName());
-                // 去掉本次使用的列
-                relaTableAllColumns.remove(referencedColumn);
                 columnSet.addAll(relaTableAllColumns);
 
                 StringBuilder labelBuilder = new StringBuilder(column.columnName());
@@ -113,6 +108,20 @@ public class TableRelationRegistry {
         }
 
         return relationships;
+    }
+
+    public String generateRelationUniqueKey(Column column1, Column column2) {
+        List<String> uniqueKey = new ArrayList<>();
+        uniqueKey.add("s:" + column1.schema());
+        uniqueKey.add("t:" + column1.tableName());
+        uniqueKey.add("c:" + column1.columnName());
+        uniqueKey.add("s:" + column2.schema());
+        uniqueKey.add("t:" + column2.tableName());
+        uniqueKey.add("c:" + column2.columnName());
+
+        Collections.sort(uniqueKey);
+
+        return String.join(",", uniqueKey);
     }
 
     private @NotNull List<Column> getTableAllColumns(String schema, String tableName) {
