@@ -67,17 +67,16 @@ public class TableRelationRegistry {
     }
 
     public List<EntityRelationShip> getAllReferenced(String schema, String tableName) {
-        final Map<Column, List<Column>> directReferenced = getDirectReferenced(schema, tableName);
-        if (directReferenced.isEmpty()) {
-            return List.of();
+        final List<Column> tableColumns = getTableAllColumns(schema, tableName);
+        if (tableColumns.isEmpty()) {
+            return Collections.emptyList();
         }
-        Set<Column> uniqueKey = new HashSet<>(directReferenced.keySet());
 
         // table1, table2 , label(col1 -> col2)
         List<EntityRelationShip> relationships = new ArrayList<>();
 
-        Queue<Column> columnSet = new ArrayDeque<>();
-        columnSet.addAll(directReferenced.keySet());
+        Set<Column> uniqueKey = new HashSet<>();
+        Queue<Column> columnSet = new ArrayDeque<>(tableColumns);
         while (!columnSet.isEmpty()) {
             Column column = columnSet.poll();
             final List<Column> referencedColumns = columnRelationMap.get(column);
@@ -88,7 +87,8 @@ public class TableRelationRegistry {
                 if (!uniqueKey.add(referencedColumn)) {
                     continue;
                 }
-                columnSet.add(referencedColumn);
+                // 添加关联表的所有列
+                columnSet.addAll(getTableAllColumns(referencedColumn.schema(), referencedColumn.tableName()));
 
                 StringBuilder labelBuilder = new StringBuilder(column.columnName());
                 if (StringUtils.isNotBlank(column.condition())) {
@@ -106,5 +106,10 @@ public class TableRelationRegistry {
         }
 
         return relationships;
+    }
+
+    private @NotNull List<Column> getTableAllColumns(String schema, String tableName) {
+        return schemaTableColumnMap.getOrDefault(schema, Collections.emptyMap())
+                .getOrDefault(tableName, Collections.emptyList());
     }
 }
