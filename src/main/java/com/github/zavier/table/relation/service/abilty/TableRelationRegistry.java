@@ -88,7 +88,10 @@ public class TableRelationRegistry {
                     continue;
                 }
                 // 添加关联表的所有列
-                columnSet.addAll(getTableAllColumns(referencedColumn.schema(), referencedColumn.tableName()));
+                final List<Column> relaTableAllColumns = getTableAllColumns(referencedColumn.schema(), referencedColumn.tableName());
+                // 去掉本次使用的列
+                relaTableAllColumns.remove(referencedColumn);
+                columnSet.addAll(relaTableAllColumns);
 
                 StringBuilder labelBuilder = new StringBuilder(column.columnName());
                 if (StringUtils.isNotBlank(column.condition())) {
