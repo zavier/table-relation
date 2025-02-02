@@ -5,6 +5,7 @@ import com.github.zavier.table.relation.dao.mapper.TableRelationMapper;
 import com.github.zavier.table.relation.service.constant.RelationType;
 import com.github.zavier.table.relation.service.dto.ColumnUsage;
 import jakarta.annotation.Resource;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -17,19 +18,26 @@ public class TableRelationRepository {
 
     public List<ColumnUsage> listAllTableRelation() {
         final List<TableRelation> tableRelations = tableRelationMapper.listAllTableRelation();
-        return tableRelations.stream().map(tableRelation -> {
-            final ColumnUsage columnUsage = new ColumnUsage();
-            columnUsage.setId(tableRelation.id());
-            columnUsage.setTableSchema(tableRelation.tableSchema());
-            columnUsage.setTableName(tableRelation.tableName());
-            columnUsage.setColumnName(tableRelation.columnName());
-            columnUsage.setCondition(tableRelation.condition());
-            columnUsage.setReferencedTableSchema(tableRelation.referencedTableSchema());
-            columnUsage.setReferencedTableName(tableRelation.referencedTableName());
-            columnUsage.setReferencedColumnName(tableRelation.referencedColumnName());
-            columnUsage.setRelationType(tableRelation.relationType().getValue());
-            return columnUsage;
-        }).toList();
+        return tableRelations.stream().map(TableRelationRepository::convert2ColumnUsage).toList();
+    }
+
+    private static @NotNull ColumnUsage convert2ColumnUsage(TableRelation tableRelation) {
+        final ColumnUsage columnUsage = new ColumnUsage();
+        columnUsage.setId(tableRelation.id());
+        columnUsage.setTableSchema(tableRelation.tableSchema());
+        columnUsage.setTableName(tableRelation.tableName());
+        columnUsage.setColumnName(tableRelation.columnName());
+        columnUsage.setCondition(tableRelation.condition());
+        columnUsage.setReferencedTableSchema(tableRelation.referencedTableSchema());
+        columnUsage.setReferencedTableName(tableRelation.referencedTableName());
+        columnUsage.setReferencedColumnName(tableRelation.referencedColumnName());
+        columnUsage.setRelationType(tableRelation.relationType().getValue());
+        return columnUsage;
+    }
+
+    public List<ColumnUsage> listTableRelation(String tableSchema) {
+        final List<TableRelation> tableRelations = tableRelationMapper.listTableRelation(tableSchema);
+        return tableRelations.stream().map(TableRelationRepository::convert2ColumnUsage).toList();
     }
 
     public void addTableRelation(ColumnUsage columnUsage) {

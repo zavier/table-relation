@@ -1,6 +1,7 @@
 package com.github.zavier.table.relation.web;
 
 import com.github.zavier.table.relation.service.DataSourceManagerService;
+import com.github.zavier.table.relation.service.Initializer;
 import com.github.zavier.table.relation.service.dto.DataSourceConfig;
 import com.github.zavier.table.relation.service.dto.Result;
 import jakarta.annotation.Resource;
@@ -14,6 +15,8 @@ public class DataSourceManagerController {
 
     @Resource
     private DataSourceManagerService dataSourceManagerService;
+    @Resource
+    private Initializer initializer;
 
     @GetMapping("/list")
     public Result<List<DataSourceConfig>> listAllDataSource() {
@@ -46,7 +49,8 @@ public class DataSourceManagerController {
 
     @GetMapping("/refresh")
     public Result<String> refresh() {
-        dataSourceManagerService.refreshConfig();
+        initializer.refreshDataSource();
+        initializer.refreshTableRelation();
         return Result.success("success");
     }
 

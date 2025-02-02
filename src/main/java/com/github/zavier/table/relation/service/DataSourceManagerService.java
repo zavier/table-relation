@@ -26,6 +26,8 @@ public class DataSourceManagerService {
     private DataSourceConfigRepository dataSourceConfigRepository;
     @Resource
     private Initializer initializer;
+    @Resource
+    private RelationManagerService relationManagerService;
 
     public List<DataSourceConfig> listAllDataSourceConfig() {
         return dataSourceConfigRepository.listAllDataSourceConfig();
@@ -46,13 +48,17 @@ public class DataSourceManagerService {
         }
 
         dataSourceConfigRepository.addDataSource(dataSourceConfig);
-        refreshConfig();
+
+        initializer.refreshDataSource();
+        updateTableRelation(dataSourceConfig.getDatabase());
+        initializer.refreshTableRelation();
     }
 
     public void deleteDataSourceConfig(Integer id) {
         Validate.notNull(id, "id can not be null");
         dataSourceConfigRepository.deleteDataSource(id);
-        refreshConfig();
+
+        initializer.refreshDataSource();
     }
 
     public void updateDataSourceConfig(DataSourceConfig dataSourceConfig) {
@@ -63,12 +69,18 @@ public class DataSourceManagerService {
         Validate.isTrue(conn, "Failed to connect to DataSource");
 
         dataSourceConfigRepository.updateDataSource(dataSourceConfig);
-        refreshConfig();
+
+        initializer.refreshDataSource();
+        updateTableRelation(dataSourceConfig.getDatabase());
+        initializer.refreshTableRelation();
     }
 
-    public void refreshConfig() {
-        // TODO 可以以事件的方式，进行更精确的刷新
-        initializer.refresh();
+    private void updateTableRelation(String tableSchema) {
+        try {
+            relationManagerService.refreshColumnUsage(tableSchema);
+        } catch (Exception e) {
+            log.error("refreshColumnUsage tableSchema:{} failed", tableSchema, e);
+        }
     }
 
 

@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -23,6 +24,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Result<Void>> handleRuntimeException(RuntimeException ex) {
         log.error("handleRuntimeException", ex);
         return new ResponseEntity<>(Result.fail(ex.getMessage()), HttpStatus.OK);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<Result<Void>> handleNoResourceFoundException(NoResourceFoundException ex) {
+        return new ResponseEntity<>(Result.fail(ex.getMessage()), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(Exception.class)

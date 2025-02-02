@@ -34,13 +34,13 @@ public class Initializer {
 
     @PostConstruct
     public void init() {
-        refresh();
+        refreshDataSource();
+        refreshTableRelation();
     }
 
-    public void refresh() {
-        log.info("refresh table relation");
+    public void refreshDataSource() {
+        log.info("refreshDataSource");
         dataSourceRegistry.clear();
-        tableRelationRegistry.clear();
 
         final List<DataSourceConfig> dataSourceConfigs = dataSourceConfigRepository.listAllDataSourceConfig();
         dataSourceConfigs.forEach(dataSourceConfig -> {
@@ -48,7 +48,11 @@ public class Initializer {
             final String jdbcUrl = DataSourceUrlBuilder.buildUrlForMySql(dataSourceConfig);
             dataSourceRegistry.addDataSource(dataSourceConfig.getDatabase(), jdbcUrl, dataSourceConfig.getUsername(), dataSourceConfig.getPassword());
         });
+    }
 
+    public void refreshTableRelation() {
+        log.info("refreshTableRelation");
+        tableRelationRegistry.clear();
         final List<TableRelation> tableRelations = tableRelationMapper.listAllTableRelation();
         tableRelations.forEach(tableRelation -> {
             Column sourceColumn = new Column(tableRelation.tableSchema(), tableRelation.tableName(), tableRelation.columnName(), tableRelation.condition());
@@ -56,6 +60,5 @@ public class Initializer {
             final ColumnRelation columnRelation = new ColumnRelation(sourceColumn, relatedColumn, tableRelation.relationType());
             tableRelationRegistry.register(columnRelation);
         });
-
     }
 }
