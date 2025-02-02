@@ -40,7 +40,7 @@ public class DataQuery {
 
         while (!queue.isEmpty()) {
             QueryCondition currentCondition = queue.poll();
-            final List<Map<String, Object>> dataMapList = executeQuery(currentCondition);
+            List<Map<String, Object>> dataMapList = executeQuery(currentCondition);
             if (dataMapList.isEmpty()) {
                 log.warn("{} dataMapList is empty", currentCondition);
                 continue;
@@ -63,6 +63,12 @@ public class DataQuery {
                 for (Column referencedColumn : referencedColumns) {
                     if (!uniqueKey.add(referencedColumn)) {
                         continue;
+                    }
+
+                    // 如果表有条件限制，则需要使用限制后的数据做关联查询(之前查询结果不影响)
+                    if (StringUtils.isNotBlank(column.condition())) {
+                        currentCondition.setCustomizeConditionSql(column.condition());
+                        dataMapList = executeQuery(currentCondition);
                     }
 
                     final List<Object> valueList = dataMapList.stream()
