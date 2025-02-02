@@ -79,6 +79,10 @@ public class TableRelationRegistry {
         Queue<Column> columnSet = new ArrayDeque<>(tableColumns);
         while (!columnSet.isEmpty()) {
             Column column = columnSet.poll();
+            if (!uniqueKey.add(column)) {
+                continue;
+            }
+
             final List<Column> referencedColumns = columnRelationMap.get(column);
             if (referencedColumns.isEmpty()) {
                 continue;
