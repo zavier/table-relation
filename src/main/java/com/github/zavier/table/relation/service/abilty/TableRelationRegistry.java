@@ -3,6 +3,7 @@ package com.github.zavier.table.relation.service.abilty;
 import com.github.zavier.table.relation.service.domain.Column;
 import com.github.zavier.table.relation.service.domain.ColumnRelation;
 import com.github.zavier.table.relation.service.dto.EntityRelationShip;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
@@ -89,7 +90,17 @@ public class TableRelationRegistry {
                 }
                 columnSet.add(referencedColumn);
 
-                String label = column.columnName() + " → " + referencedColumn.columnName() + "(" + referencedColumn.condition() + ")";
+                StringBuilder labelBuilder = new StringBuilder(column.columnName());
+                if (StringUtils.isNotBlank(column.condition())) {
+                    labelBuilder.append("(").append(column.condition()).append(")");
+                }
+                labelBuilder.append(" → ");
+                labelBuilder.append(referencedColumn.columnName());
+                if (StringUtils.isNotBlank(referencedColumn.condition())) {
+                    labelBuilder.append("(").append(referencedColumn.condition()).append(")");
+                }
+
+                String label = labelBuilder.toString();
                 relationships.add(new EntityRelationShip(column.tableName(), referencedColumn.tableName(), label));
             }
         }
