@@ -78,7 +78,7 @@ public class RelationManagerService {
         initializer.refreshTableRelation();
     }
 
-    public void refreshColumnUsage(String tableSchema) {
+    public void updateColumnUsage(String tableSchema) {
         final Optional<DataSource> sourceOptional = dataSourceRegistry.getDataSource(tableSchema);
         Validate.isTrue(sourceOptional.isPresent(), "dataSource not found:" + tableSchema);
         final DataSource dataSource = sourceOptional.get();

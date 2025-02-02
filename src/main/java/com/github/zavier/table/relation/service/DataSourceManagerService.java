@@ -77,7 +77,7 @@ public class DataSourceManagerService {
 
     private void updateTableRelation(String tableSchema) {
         try {
-            relationManagerService.refreshColumnUsage(tableSchema);
+            relationManagerService.updateColumnUsage(tableSchema);
         } catch (Exception e) {
             log.error("refreshColumnUsage tableSchema:{} failed", tableSchema, e);
         }
