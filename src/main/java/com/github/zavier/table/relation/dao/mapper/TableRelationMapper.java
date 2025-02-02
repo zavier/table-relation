@@ -39,7 +39,7 @@ public class TableRelationMapper {
     }
 
     public void addTableRelation(TableRelation tableRelation) {
-        String sql = "INSERT INTO table_relation (table_schema, table_name, column_name, condition, referenced_table_schema, referenced_table_name, referenced_column_name, relation_type) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO table_relation (table_schema, table_name, column_name, condition, referenced_table_schema, referenced_table_name, referenced_column_name, relation_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         jdbcTemplate.update(sql, tableRelation.tableSchema(), tableRelation.tableName(), tableRelation.columnName(), tableRelation.condition(), tableRelation.referencedTableSchema(), tableRelation.referencedTableName(), tableRelation.referencedColumnName(), tableRelation.relationType().getValue());
     }
 
