@@ -37,12 +37,6 @@ public class DataController {
         return dataQueryService.getTableColumns(schema, tableName);
     }
 
-    @GetMapping("/erDiagram")
-    public Result<String> getTableRelationMermaidERDiagram(@RequestParam("schema") String schema, @RequestParam("tableName") String tableName) {
-        final String erDiagram = relationManagerService.getTableRelationMermaidERDiagram(schema, tableName);
-        return Result.success(erDiagram);
-    }
-
     @PostMapping("/sqlQuery")
     public Result<Map<String, List<Map<String, Object>>>> queryRelaData(@RequestBody QueryCondition queryCondition) {
         return dataQueryService.queryRelaData(queryCondition);

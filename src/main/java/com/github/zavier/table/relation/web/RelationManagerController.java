@@ -37,4 +37,10 @@ public class RelationManagerController {
         relationManagerService.deleteColumnUsage(id);
         return Result.success(true);
     }
+
+    @GetMapping("/erDiagram")
+    public Result<String> getTableRelationMermaidERDiagram(@RequestParam("schema") String schema, @RequestParam("tableName") String tableName) {
+        final String erDiagram = relationManagerService.getTableRelationMermaidERDiagram(schema, tableName);
+        return Result.success(erDiagram);
+    }
 }
