@@ -19,19 +19,19 @@ public class MySqlTableMetaInfoQuery {
 
     public List<TableColumnInfo> getTableColumnMetaInfo(String schema, DataSource dataSource) {
         String sql = "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, COLUMN_COMMENT FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = ?";
-        final List<Map<String, Object>> maps = sqlExecutor.sqlQuery(dataSource, sql, schema);
+        final List<Map<String, Object>> maps = sqlExecutor.sqlQueryWithoutLimit(dataSource, sql, schema);
         return TableInfoConverter.convert2TableColumnInfo(maps);
     }
 
     public List<TableColumnInfo> getTableColumnMetaInfo(String schema, String table, DataSource dataSource) {
         String sql = "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, COLUMN_COMMENT FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?";
-        final List<Map<String, Object>> maps = sqlExecutor.sqlQuery(dataSource, sql, schema, table);
+        final List<Map<String, Object>> maps = sqlExecutor.sqlQueryWithoutLimit(dataSource, sql, schema, table);
         return TableInfoConverter.convert2TableColumnInfo(maps);
     }
 
     public List<ColumnUsage> getTableRelationMetaInfo(String schema, DataSource dataSource) {
         String sql = "SELECT `TABLE_SCHEMA`,`TABLE_NAME`,`COLUMN_NAME`,`REFERENCED_TABLE_SCHEMA`,`REFERENCED_TABLE_NAME`,`REFERENCED_COLUMN_NAME` FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA = ? and `REFERENCED_COLUMN_NAME` IS NOT NULL";
-        final List<Map<String, Object>> maps = sqlExecutor.sqlQuery(dataSource, sql, schema);
+        final List<Map<String, Object>> maps = sqlExecutor.sqlQueryWithoutLimit(dataSource, sql, schema);
         return maps.stream().map(ColumnUsageConverter::convert2ColumnUsage).toList();
     }
 

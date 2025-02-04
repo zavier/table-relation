@@ -15,11 +15,18 @@ public class SqlExecutor {
 
     private static final int MAX_SQL_LENGTH = 10;
 
-    public List<Map<String, Object>> sqlQuery(DataSource dataSource, String sql, Object... args) {
+    public List<Map<String, Object>> sqlQueryWithLimit(DataSource dataSource, String sql, Object... args) {
         String limitSql = wrapLimit2Sql(sql);
         final JdbcTemplate jdbcTemplate = getJdbcTemplate(dataSource);
         final List<Map<String, Object>> result = jdbcTemplate.queryForList(limitSql, args);
-        log.info("execute sql: {} args: {} resultSize:{}", limitSql, Arrays.toString(args), result.size());
+        log.info("sqlQueryWithLimit sql: {} args: {} resultSize:{}", limitSql, Arrays.toString(args), result.size());
+        return result;
+    }
+
+    public List<Map<String, Object>> sqlQueryWithoutLimit(DataSource dataSource, String sql, Object... args) {
+        final JdbcTemplate jdbcTemplate = getJdbcTemplate(dataSource);
+        final List<Map<String, Object>> result = jdbcTemplate.queryForList(sql, args);
+        log.info("sqlQueryWithoutLimit sql: {} args: {} resultSize:{}", sql, Arrays.toString(args), result.size());
         return result;
     }
 

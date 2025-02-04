@@ -108,7 +108,7 @@ public class DataQuery {
             throw new RuntimeException("dataSource not found:" + schema);
         }
         final DataSource dataSource = sourceOptional.get();
-        return sqlExecutor.sqlQuery(dataSource, queryCondition.buildSql());
+        return sqlExecutor.sqlQueryWithLimit(dataSource, queryCondition.buildSql());
     }
 
 }

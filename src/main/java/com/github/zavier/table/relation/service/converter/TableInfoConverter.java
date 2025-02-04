@@ -50,8 +50,19 @@ public class TableInfoConverter {
     public static ColumnInfo convert2ColumnInfo(Map<String, Object> dataMap) {
         return new ColumnInfo(
                 (String) dataMap.get("COLUMN_NAME"),
-                (String) dataMap.get("COLUMN_TYPE"),
+                convertColumnType((String) dataMap.get("COLUMN_TYPE")),
                 (String) dataMap.get("COLUMN_COMMENT")
         );
+    }
+
+    private static String convertColumnType(String columnType) {
+        String compareColumnType = columnType.toLowerCase();
+        if (compareColumnType.startsWith("enum")) {
+            return "enum";
+        }
+        if (compareColumnType.startsWith("char") || compareColumnType.startsWith("varchar")) {
+            return "string";
+        }
+        return compareColumnType;
     }
 }

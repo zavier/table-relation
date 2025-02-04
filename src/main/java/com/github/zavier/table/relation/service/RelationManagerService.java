@@ -4,9 +4,10 @@ import com.github.zavier.table.relation.dao.repository.TableRelationRepository;
 import com.github.zavier.table.relation.service.abilty.DataSourceRegistry;
 import com.github.zavier.table.relation.service.abilty.MySqlTableMetaInfoQuery;
 import com.github.zavier.table.relation.service.abilty.TableRelationRegistry;
+import com.github.zavier.table.relation.service.domain.ColumnInfo;
 import com.github.zavier.table.relation.service.domain.ColumnUsage;
-import com.github.zavier.table.relation.service.dto.EntityRelationShip;
 import com.github.zavier.table.relation.service.domain.TableColumnInfo;
+import com.github.zavier.table.relation.service.dto.EntityRelationShip;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -14,9 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class RelationManagerService {
@@ -101,10 +100,36 @@ public class RelationManagerService {
         String head = "erDiagram";
         String template = "  %s ||--o{ %s : \"%s\"";
         final StringBuilder builder = new StringBuilder(head);
+        // 关系
+        Set<String> tables = new HashSet<>();
         for (EntityRelationShip entityRelationship : allReferenced) {
+            tables.add(entityRelationship.sourceTable());
+            tables.add(entityRelationship.targetTable());
+
             final String format = String.format(template, entityRelationship.sourceTable(), entityRelationship.targetTable(), entityRelationship.label());
             builder.append("\n").append(format);
         }
+
+        // 表信息
+        final List<TableColumnInfo> schemaAllTableInfo = getSchemaAllTableInfo(schema);
+        for (TableColumnInfo tableColumnInfo : schemaAllTableInfo) {
+            if (!tables.contains(tableColumnInfo.tableName())) {
+                continue;
+            }
+
+            builder.append("\n").append("  ").append(tableColumnInfo.tableName()).append(" ").append("{");
+            for (ColumnInfo columnInfo : tableColumnInfo.columns()) {
+                builder.append("\n")
+                        .append("      ")
+                        .append(columnInfo.columnType())
+                        .append(" ")
+                        .append(columnInfo.columnName())
+                        .append(" ")
+                        .append(columnInfo.columnComment());
+            }
+            builder.append("\n").append("  }");
+        }
+
         return builder.toString();
     }
 
