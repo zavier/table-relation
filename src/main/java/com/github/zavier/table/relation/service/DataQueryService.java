@@ -1,7 +1,10 @@
 package com.github.zavier.table.relation.service;
 
 import com.github.zavier.table.relation.service.abilty.DataSourceRegistry;
+import com.github.zavier.table.relation.service.abilty.MySqlTableMetaInfoQuery;
 import com.github.zavier.table.relation.service.abilty.SqlExecutor;
+import com.github.zavier.table.relation.service.domain.ColumnInfo;
+import com.github.zavier.table.relation.service.domain.TableColumnInfo;
 import com.github.zavier.table.relation.service.dto.Condition;
 import com.github.zavier.table.relation.service.dto.QueryCondition;
 import com.github.zavier.table.relation.service.dto.Result;
@@ -24,6 +27,8 @@ public class DataQueryService {
     private DataSourceRegistry dataSourceRegistry;
     @Resource
     private SqlExecutor sqlExecutor;
+    @Resource
+    private MySqlTableMetaInfoQuery mySqlTableMetaInfoQuery;
 
     public Result<List<String>> getAllSchema() {
         return Result.success(dataSourceRegistry.getAllSchema());
@@ -37,7 +42,10 @@ public class DataQueryService {
             return Result.success(List.of());
         }
         final DataSource dataSource = sourceOptional.get();
-        return Result.success(sqlExecutor.getSchemaTables(schema, dataSource));
+
+        final List<TableColumnInfo> tableColumnMetaInfo = mySqlTableMetaInfoQuery.getTableColumnMetaInfo(schema, dataSource);
+        final List<String> tableNameList = tableColumnMetaInfo.stream().map(TableColumnInfo::tableName).toList();
+        return Result.success(tableNameList);
     }
 
     public Result<List<String>> getTableColumns(String schema, String tableName) {
@@ -49,7 +57,16 @@ public class DataQueryService {
             return Result.success(List.of());
         }
         final DataSource dataSource = sourceOptional.get();
-        return Result.success(sqlExecutor.getTableColumns(schema, tableName, dataSource));
+
+        final List<TableColumnInfo> tableColumnMetaInfo = mySqlTableMetaInfoQuery.getTableColumnMetaInfo(schema, tableName, dataSource);
+        final List<String> columnNames = tableColumnMetaInfo.stream()
+                .map(TableColumnInfo::columns)
+                .flatMap(List::stream)
+                .map(ColumnInfo::columnName)
+                .distinct()
+                .toList();
+
+        return Result.success(columnNames);
     }
 
 

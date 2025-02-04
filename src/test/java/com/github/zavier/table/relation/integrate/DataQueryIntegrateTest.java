@@ -10,7 +10,6 @@ import com.github.zavier.table.relation.service.dto.Condition;
 import com.github.zavier.table.relation.service.dto.QueryCondition;
 import com.github.zavier.table.relation.service.query.DataQuery;
 import jakarta.annotation.Resource;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -34,7 +33,7 @@ public class DataQueryIntegrateTest {
     @Resource
     private ObjectMapper objectMapper;
 
-    @BeforeEach
+//    @BeforeEach
     public void initData() {
         dataSourceRegistry.addDataSource("employees", "jdbc:mysql://localhost:3306/employees", "root", "mysqlroot");
 

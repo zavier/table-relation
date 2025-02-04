@@ -1,4 +1,4 @@
-package com.github.zavier.table.relation.service.dto;
+package com.github.zavier.table.relation.service.domain;
 
 public class ColumnUsage {
     private Integer id;

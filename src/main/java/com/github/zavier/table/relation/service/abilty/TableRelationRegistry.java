@@ -67,7 +67,7 @@ public class TableRelationRegistry {
     }
 
     public List<EntityRelationShip> getAllReferenced(String schema, String tableName) {
-        final List<Column> tableColumns = getTableAllColumns(schema, tableName);
+        final List<Column> tableColumns = getTableHasRelationColumns(schema, tableName);
         if (tableColumns.isEmpty()) {
             return Collections.emptyList();
         }
@@ -89,7 +89,7 @@ public class TableRelationRegistry {
                     continue;
                 }
                 // 添加关联表的所有列
-                final List<Column> relaTableAllColumns = getTableAllColumns(referencedColumn.schema(), referencedColumn.tableName());
+                final List<Column> relaTableAllColumns = getTableHasRelationColumns(referencedColumn.schema(), referencedColumn.tableName());
                 columnSet.addAll(relaTableAllColumns);
 
                 StringBuilder labelBuilder = new StringBuilder(column.columnName());
@@ -124,8 +124,9 @@ public class TableRelationRegistry {
         return String.join(",", uniqueKey);
     }
 
-    private @NotNull List<Column> getTableAllColumns(String schema, String tableName) {
+    private @NotNull List<Column> getTableHasRelationColumns(String schema, String tableName) {
         return schemaTableColumnMap.getOrDefault(schema, Collections.emptyMap())
                 .getOrDefault(tableName, Collections.emptyList());
     }
+
 }

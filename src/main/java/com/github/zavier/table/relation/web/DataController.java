@@ -1,8 +1,7 @@
 package com.github.zavier.table.relation.web;
 
 import com.github.zavier.table.relation.service.DataQueryService;
-import com.github.zavier.table.relation.service.abilty.TableRelationRegistry;
-import com.github.zavier.table.relation.service.dto.EntityRelationShip;
+import com.github.zavier.table.relation.service.RelationManagerService;
 import com.github.zavier.table.relation.service.dto.QueryCondition;
 import com.github.zavier.table.relation.service.dto.Result;
 import jakarta.annotation.Resource;
@@ -21,7 +20,7 @@ public class DataController {
     @Resource
     private DataQueryService dataQueryService;
     @Resource
-    private TableRelationRegistry tableRelationRegistry;
+    private RelationManagerService relationManagerService;
 
     @GetMapping("/allSchema")
     public Result<List<String>> getAllSchema() {
@@ -40,15 +39,8 @@ public class DataController {
 
     @GetMapping("/erDiagram")
     public Result<String> getTableRelationMermaidERDiagram(@RequestParam("schema") String schema, @RequestParam("tableName") String tableName) {
-        final List<EntityRelationShip> allReferenced = tableRelationRegistry.getAllReferenced(schema, tableName);
-        String head = "erDiagram";
-        String template = "  %s ||--o{ %s : \"%s\"";
-        final StringBuilder builder = new StringBuilder(head);
-        for (EntityRelationShip entityRelationship : allReferenced) {
-            final String format = String.format(template, entityRelationship.sourceTable(), entityRelationship.targetTable(), entityRelationship.label());
-            builder.append("\n").append(format);
-        }
-        return Result.success(builder.toString());
+        final String erDiagram = relationManagerService.getTableRelationMermaidERDiagram(schema, tableName);
+        return Result.success(erDiagram);
     }
 
     @PostMapping("/sqlQuery")

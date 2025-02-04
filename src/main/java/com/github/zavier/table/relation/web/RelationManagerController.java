@@ -1,7 +1,7 @@
 package com.github.zavier.table.relation.web;
 
 import com.github.zavier.table.relation.service.RelationManagerService;
-import com.github.zavier.table.relation.service.dto.ColumnUsage;
+import com.github.zavier.table.relation.service.domain.ColumnUsage;
 import com.github.zavier.table.relation.service.dto.Result;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;

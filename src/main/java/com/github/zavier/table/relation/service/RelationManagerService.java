@@ -2,9 +2,11 @@ package com.github.zavier.table.relation.service;
 
 import com.github.zavier.table.relation.dao.repository.TableRelationRepository;
 import com.github.zavier.table.relation.service.abilty.DataSourceRegistry;
-import com.github.zavier.table.relation.service.abilty.SqlExecutor;
-import com.github.zavier.table.relation.service.constant.RelationType;
-import com.github.zavier.table.relation.service.dto.ColumnUsage;
+import com.github.zavier.table.relation.service.abilty.MySqlTableMetaInfoQuery;
+import com.github.zavier.table.relation.service.abilty.TableRelationRegistry;
+import com.github.zavier.table.relation.service.domain.ColumnUsage;
+import com.github.zavier.table.relation.service.dto.EntityRelationShip;
+import com.github.zavier.table.relation.service.domain.TableColumnInfo;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -13,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -29,7 +30,9 @@ public class RelationManagerService {
     @Resource
     private DataSourceRegistry dataSourceRegistry;
     @Resource
-    private SqlExecutor sqlExecutor;
+    private TableRelationRegistry tableRelationRegistry;
+    @Resource
+    private MySqlTableMetaInfoQuery mySqlTableMetaInfoQuery;
 
     public List<ColumnUsage> listAllColumnUsage() {
         return tableRelationRepository.listAllTableRelation();
@@ -85,15 +88,32 @@ public class RelationManagerService {
 
         final List<ColumnUsage> existColumnUsages = tableRelationRepository.listTableRelation(tableSchema);
 
-        String sql = "SELECT `TABLE_SCHEMA`,`TABLE_NAME`,`COLUMN_NAME`,`REFERENCED_TABLE_SCHEMA`,`REFERENCED_TABLE_NAME`,`REFERENCED_COLUMN_NAME` FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA = ? and `REFERENCED_COLUMN_NAME` IS NOT NULL";
-        final List<Map<String, Object>> maps = sqlExecutor.sqlQuery(dataSource, sql, tableSchema);
-        final List<ColumnUsage> thisColumnUsageList = maps.stream().map(RelationManagerService::convert2ColumnUsage).toList();
-
+        final List<ColumnUsage> thisColumnUsageList = mySqlTableMetaInfoQuery.getTableRelationMetaInfo(tableSchema, dataSource);
         thisColumnUsageList.forEach(thisUsage -> {
             if (!contains(existColumnUsages, thisUsage)) {
                 tableRelationRepository.addTableRelation(thisUsage);
             }
         });
+    }
+
+    public String getTableRelationMermaidERDiagram(String schema, String tableName) {
+        final List<EntityRelationShip> allReferenced = tableRelationRegistry.getAllReferenced(schema, tableName);
+        String head = "erDiagram";
+        String template = "  %s ||--o{ %s : \"%s\"";
+        final StringBuilder builder = new StringBuilder(head);
+        for (EntityRelationShip entityRelationship : allReferenced) {
+            final String format = String.format(template, entityRelationship.sourceTable(), entityRelationship.targetTable(), entityRelationship.label());
+            builder.append("\n").append(format);
+        }
+        return builder.toString();
+    }
+
+    public List<TableColumnInfo> getSchemaAllTableInfo(String schema) {
+        final Optional<DataSource> sourceOptional = dataSourceRegistry.getDataSource(schema);
+        Validate.isTrue(sourceOptional.isPresent(), "dataSource not found:" + schema);
+        final DataSource dataSource = sourceOptional.get();
+
+        return mySqlTableMetaInfoQuery.getTableColumnMetaInfo(schema, dataSource);
     }
 
     private boolean contains(List<ColumnUsage> columnUsages, ColumnUsage columnUsage) {
@@ -111,26 +131,6 @@ public class RelationManagerService {
                             && Objects.equals(usage.getReferencedColumnName(), columnUsage.getReferencedColumnName());
                     return equals;
                 });
-    }
-
-    private static ColumnUsage convert2ColumnUsage(Map<String, Object> it) {
-        final String schema = (String) it.get("TABLE_SCHEMA");
-        final String tableName = (String) it.get("TABLE_NAME");
-        final String columnName = (String) it.get("COLUMN_NAME");
-        final String referencedTableSchema = (String) it.get("REFERENCED_TABLE_SCHEMA");
-        final String referencedTableName = (String) it.get("REFERENCED_TABLE_NAME");
-        final String referencedColumnName = (String) it.get("REFERENCED_COLUMN_NAME");
-
-        final ColumnUsage usage = new ColumnUsage();
-        usage.setTableSchema(schema);
-        usage.setTableName(tableName);
-        usage.setColumnName(columnName);
-        usage.setCondition("");
-        usage.setReferencedTableSchema(referencedTableSchema);
-        usage.setReferencedTableName(referencedTableName);
-        usage.setReferencedColumnName(referencedColumnName);
-        usage.setRelationType(RelationType.ONE_TO_MANY.getValue());
-        return usage;
     }
 
     private void checkParam(ColumnUsage columnUsage) {
