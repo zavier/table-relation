@@ -63,6 +63,12 @@ public class TableInfoConverter {
         if (compareColumnType.startsWith("char") || compareColumnType.startsWith("varchar")) {
             return "string";
         }
+        if (compareColumnType.startsWith("int") || compareColumnType.startsWith("tinyint") || compareColumnType.startsWith("smallint") || compareColumnType.startsWith("mediumint") || compareColumnType.startsWith("bigint")) {
+            return "int";
+        }
+        if (compareColumnType.startsWith("float") || compareColumnType.startsWith("double") || compareColumnType.startsWith("decimal")) {
+            return "float";
+        }
         return compareColumnType;
     }
 }

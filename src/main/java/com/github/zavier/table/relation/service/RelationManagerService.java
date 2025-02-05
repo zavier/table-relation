@@ -9,6 +9,7 @@ import com.github.zavier.table.relation.service.domain.ColumnUsage;
 import com.github.zavier.table.relation.service.domain.TableColumnInfo;
 import com.github.zavier.table.relation.service.dto.EntityRelationShip;
 import jakarta.annotation.Resource;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,7 +114,7 @@ public class RelationManagerService {
         // 表信息
         final List<TableColumnInfo> schemaAllTableInfo = getSchemaAllTableInfo(schema);
         for (TableColumnInfo tableColumnInfo : schemaAllTableInfo) {
-            if (!tables.contains(tableColumnInfo.tableName())) {
+            if (!needGenerate(tableColumnInfo, tables, tableName)) {
                 continue;
             }
 
@@ -123,14 +124,27 @@ public class RelationManagerService {
                         .append("      ")
                         .append(columnInfo.columnType())
                         .append(" ")
-                        .append(columnInfo.columnName())
-                        .append(" ")
-                        .append(columnInfo.columnComment());
+                        .append(columnInfo.columnName());
+                if (StringUtils.isNotBlank(columnInfo.columnComment())) {
+                    builder.append(" ")
+                            .append("\"")
+                            .append(columnInfo.columnComment())
+                            .append("\"");
+                }
             }
             builder.append("\n").append("  }");
         }
 
         return builder.toString();
+    }
+
+    private static boolean needGenerate(TableColumnInfo tableColumnInfo, Set<String> tables, String selectedTableName) {
+        // 如果没有关联表，则只展示选择的表信息即可
+        if (tables.isEmpty()) {
+            return tableColumnInfo.tableName().equals(selectedTableName);
+        }
+        // 否则按找关系筛选
+        return tables.contains(tableColumnInfo.tableName());
     }
 
     public List<TableColumnInfo> getSchemaAllTableInfo(String schema) {
