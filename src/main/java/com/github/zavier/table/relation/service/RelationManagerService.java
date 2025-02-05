@@ -96,7 +96,7 @@ public class RelationManagerService {
         });
     }
 
-    public String getTableRelationMermaidERDiagram(String schema, String tableName) {
+    public String getTableRelationMermaidERDiagram(String schema, String tableName, Boolean needTableInfo) {
         final List<EntityRelationShip> allReferenced = tableRelationRegistry.getAllReferenced(schema, tableName);
         String head = "erDiagram";
         String template = "  %s ||--o{ %s : \"%s\"";
@@ -109,6 +109,10 @@ public class RelationManagerService {
 
             final String format = String.format(template, entityRelationship.sourceTable(), entityRelationship.targetTable(), entityRelationship.label());
             builder.append("\n").append(format);
+        }
+
+        if (!needTableInfo) {
+            return builder.toString();
         }
 
         // 表信息
@@ -147,7 +151,7 @@ public class RelationManagerService {
         return tables.contains(tableColumnInfo.tableName());
     }
 
-    public List<TableColumnInfo> getSchemaAllTableInfo(String schema) {
+    private List<TableColumnInfo> getSchemaAllTableInfo(String schema) {
         final Optional<DataSource> sourceOptional = dataSourceRegistry.getDataSource(schema);
         Validate.isTrue(sourceOptional.isPresent(), "dataSource not found:" + schema);
         final DataSource dataSource = sourceOptional.get();

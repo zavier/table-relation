@@ -39,8 +39,10 @@ public class RelationManagerController {
     }
 
     @GetMapping("/erDiagram")
-    public Result<String> getTableRelationMermaidERDiagram(@RequestParam("schema") String schema, @RequestParam("tableName") String tableName) {
-        final String erDiagram = relationManagerService.getTableRelationMermaidERDiagram(schema, tableName);
+    public Result<String> getTableRelationMermaidERDiagram(@RequestParam("schema") String schema,
+                                                           @RequestParam("tableName") String tableName,
+                                                           @RequestParam(defaultValue = "true") Boolean needTableInfo) {
+        final String erDiagram = relationManagerService.getTableRelationMermaidERDiagram(schema, tableName, needTableInfo);
         return Result.success(erDiagram);
     }
 }

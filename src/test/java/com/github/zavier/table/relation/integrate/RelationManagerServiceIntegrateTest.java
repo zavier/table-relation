@@ -61,7 +61,7 @@ class RelationManagerServiceIntegrateTest {
 
     @Test
     void getTableRelationMermaidERDiagram() {
-        final String erDiagram = relationManagerService.getTableRelationMermaidERDiagram("employees", "employees");
+        final String erDiagram = relationManagerService.getTableRelationMermaidERDiagram("employees", "employees", true);
         String expected = """
                 erDiagram
                   employees ||--o{ dept_emp : "emp_no → emp_no"
@@ -71,40 +71,40 @@ class RelationManagerServiceIntegrateTest {
                   dept_emp ||--o{ departments : "dept_no → dept_no"
                   dept_manager ||--o{ departments : "dept_no → dept_no"
                   dept_manager {
-                      int emp_no\s
-                      string dept_no\s
-                      date from_date\s
-                      date to_date\s
+                      int emp_no
+                      string dept_no
+                      date from_date
+                      date to_date
                   }
                   dept_emp {
-                      int emp_no\s
-                      string dept_no\s
-                      date from_date\s
-                      date to_date\s
+                      int emp_no
+                      string dept_no
+                      date from_date
+                      date to_date
                   }
                   departments {
-                      string dept_no\s
-                      string dept_name\s
+                      string dept_no
+                      string dept_name
                   }
                   employees {
-                      int emp_no\s
-                      date birth_date\s
-                      string first_name\s
-                      string last_name\s
-                      enum gender\s
-                      date hire_date\s
+                      int emp_no
+                      date birth_date
+                      string first_name
+                      string last_name
+                      enum gender
+                      date hire_date
                   }
                   titles {
-                      int emp_no\s
-                      string title\s
-                      date from_date\s
-                      date to_date\s
+                      int emp_no
+                      string title
+                      date from_date
+                      date to_date
                   }
                   salaries {
-                      int emp_no\s
-                      int salary\s
-                      date from_date\s
-                      date to_date\s
+                      int emp_no
+                      int salary
+                      date from_date
+                      date to_date
                   }
                 """.strip();
         assertEquals(expected, erDiagram);
