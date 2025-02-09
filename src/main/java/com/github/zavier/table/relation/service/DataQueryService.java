@@ -8,15 +8,14 @@ import com.github.zavier.table.relation.service.domain.TableColumnInfo;
 import com.github.zavier.table.relation.service.dto.Condition;
 import com.github.zavier.table.relation.service.dto.QueryCondition;
 import com.github.zavier.table.relation.service.dto.Result;
+import com.github.zavier.table.relation.service.dto.TableData;
 import com.github.zavier.table.relation.service.query.DataQuery;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.Validate;
 import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class DataQueryService {
@@ -49,19 +48,11 @@ public class DataQueryService {
     }
 
     public Result<List<String>> getTableColumns(String schema, String tableName) {
-        Validate.notBlank(schema, "schema can not be blank");
-        Validate.notBlank(tableName, "tableName can not be blank");
 
-        final Optional<DataSource> sourceOptional = dataSourceRegistry.getDataSource(schema);
-        if (sourceOptional.isEmpty()) {
-            return Result.success(List.of());
-        }
-        final DataSource dataSource = sourceOptional.get();
+        final TableColumnInfo tableColumnMetaInfo = getTableColumnInfo(schema, tableName);
 
-        final List<TableColumnInfo> tableColumnMetaInfo = mySqlTableMetaInfoQuery.getTableColumnMetaInfo(schema, tableName, dataSource);
-        final List<String> columnNames = tableColumnMetaInfo.stream()
-                .map(TableColumnInfo::columns)
-                .flatMap(List::stream)
+        final List<String> columnNames = tableColumnMetaInfo.columns()
+                .stream()
                 .map(ColumnInfo::columnName)
                 .distinct()
                 .toList();
@@ -70,10 +61,35 @@ public class DataQueryService {
     }
 
 
-    public Result<Map<String, List<Map<String, Object>>>> queryRelaData(QueryCondition queryCondition) {
+    public Result<TableData> queryTableData(QueryCondition queryCondition) {
         checkParam(queryCondition);
 
-        return Result.success(dataQuery.query(queryCondition));
+        // table -> list<col, value>
+        final Map<String, List<Map<String, Object>>> tableData = dataQuery.query(queryCondition);
+
+        // table -> col -> comment
+        Map<String, Map<String, String>> comments = new HashMap<>();
+        final Set<String> tableNameSet = tableData.keySet();
+        tableNameSet.forEach(tableName -> {
+            final TableColumnInfo columnInfo = getTableColumnInfo(queryCondition.getSchema(), tableName);
+            final Map<String, String> commentMap = new HashMap<>();
+            columnInfo.columns().forEach(column -> {
+                commentMap.put(column.columnName(), column.columnComment());
+            });
+            comments.put(tableName, commentMap);
+        });
+        return Result.success(new TableData(tableData, comments));
+    }
+
+    private TableColumnInfo getTableColumnInfo(String schema, String tableName) {
+        Validate.notBlank(schema, "schema can not be blank");
+        Validate.notBlank(tableName, "tableName can not be blank");
+
+        final Optional<DataSource> sourceOptional = dataSourceRegistry.getDataSource(schema);
+        Validate.isTrue(sourceOptional.isPresent(), "dataSource not found:" + schema);
+        final DataSource dataSource = sourceOptional.get();
+
+        return mySqlTableMetaInfoQuery.getTableColumnMetaInfo(schema, tableName, dataSource);
     }
 
     private static void checkParam(QueryCondition queryCondition) {

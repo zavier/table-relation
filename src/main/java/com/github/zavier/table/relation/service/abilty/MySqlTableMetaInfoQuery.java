@@ -5,6 +5,7 @@ import com.github.zavier.table.relation.service.converter.TableInfoConverter;
 import com.github.zavier.table.relation.service.domain.ColumnUsage;
 import com.github.zavier.table.relation.service.domain.TableColumnInfo;
 import jakarta.annotation.Resource;
+import org.apache.commons.lang3.Validate;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
@@ -23,10 +24,15 @@ public class MySqlTableMetaInfoQuery {
         return TableInfoConverter.convert2TableColumnInfo(maps);
     }
 
-    public List<TableColumnInfo> getTableColumnMetaInfo(String schema, String table, DataSource dataSource) {
+    public TableColumnInfo getTableColumnMetaInfo(String schema, String table, DataSource dataSource) {
         String sql = "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, COLUMN_COMMENT FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?";
         final List<Map<String, Object>> maps = sqlExecutor.sqlQueryWithoutLimit(dataSource, sql, schema, table);
-        return TableInfoConverter.convert2TableColumnInfo(maps);
+        final List<TableColumnInfo> tableColumnInfos = TableInfoConverter.convert2TableColumnInfo(maps);
+
+        Validate.notEmpty(tableColumnInfos, "tableColumnInfos is empty");
+        Validate.isTrue(tableColumnInfos.size() == 1, "tableColumnInfos size is not 1");
+
+        return tableColumnInfos.get(0);
     }
 
     public List<ColumnUsage> getTableRelationMetaInfo(String schema, DataSource dataSource) {

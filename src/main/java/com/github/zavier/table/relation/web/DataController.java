@@ -4,6 +4,7 @@ import com.github.zavier.table.relation.service.DataQueryService;
 import com.github.zavier.table.relation.service.RelationManagerService;
 import com.github.zavier.table.relation.service.dto.QueryCondition;
 import com.github.zavier.table.relation.service.dto.Result;
+import com.github.zavier.table.relation.service.dto.TableData;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,8 +39,8 @@ public class DataController {
     }
 
     @PostMapping("/sqlQuery")
-    public Result<Map<String, List<Map<String, Object>>>> queryRelaData(@RequestBody QueryCondition queryCondition) {
-        return dataQueryService.queryRelaData(queryCondition);
+    public Result<TableData> queryRelaData(@RequestBody QueryCondition queryCondition) {
+        return dataQueryService.queryTableData(queryCondition);
     }
 
 }
