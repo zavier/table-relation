@@ -30,7 +30,9 @@ public class DataQueryService {
     private MySqlTableMetaInfoQuery mySqlTableMetaInfoQuery;
 
     public Result<List<String>> getAllSchema() {
-        return Result.success(dataSourceRegistry.getAllSchema());
+        final List<String> allSchema = dataSourceRegistry.getAllSchema();
+        Collections.sort(allSchema);
+        return Result.success(allSchema);
     }
 
     public Result<List<String>> getSchemaTables(String schema) {
@@ -43,7 +45,9 @@ public class DataQueryService {
         final DataSource dataSource = sourceOptional.get();
 
         final List<TableColumnInfo> tableColumnMetaInfo = mySqlTableMetaInfoQuery.getTableColumnMetaInfo(schema, dataSource);
-        final List<String> tableNameList = tableColumnMetaInfo.stream().map(TableColumnInfo::tableName).toList();
+        final List<String> tableNameList = tableColumnMetaInfo.stream().map(TableColumnInfo::tableName)
+                .sorted()
+                .toList();
         return Result.success(tableNameList);
     }
 
@@ -55,6 +59,7 @@ public class DataQueryService {
                 .stream()
                 .map(ColumnInfo::columnName)
                 .distinct()
+                .sorted()
                 .toList();
 
         return Result.success(columnNames);
