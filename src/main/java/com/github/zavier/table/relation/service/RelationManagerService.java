@@ -126,9 +126,9 @@ public class RelationManagerService {
             for (ColumnInfo columnInfo : tableColumnInfo.columns()) {
                 builder.append("\n")
                         .append("      ")
-                        .append(columnInfo.columnType())
+                        .append(columnInfo.columnName())
                         .append(" ")
-                        .append(columnInfo.columnName());
+                        .append(columnInfo.columnType());
                 if (StringUtils.isNotBlank(columnInfo.columnComment())) {
                     builder.append(" ")
                             .append("\"")
