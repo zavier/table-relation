@@ -27,19 +27,20 @@ public class DataQuery {
     private TableRelationRegistry tableRelationRegistry;
 
     public Map<String, List<Map<String, Object>>> query(QueryCondition queryCondition) {
-        log.info("query:{}", queryCondition);
         return queryByBfs(queryCondition);
     }
 
     private Map<String, List<Map<String, Object>>> queryByBfs(QueryCondition queryCondition) {
         Queue<QueryCondition> queue = new LinkedList<>();
         queue.add(queryCondition);
+        log.info("enqueue queryCondition:{}", queryCondition);
 
         Map<String, List<Map<String, Object>>> resultMap = new HashMap<>();
         Set<Column> uniqueKey = new HashSet<>();
 
         while (!queue.isEmpty()) {
             QueryCondition currentCondition = queue.poll();
+            log.info("dequeue queryCondition:{}", currentCondition);
             List<Map<String, Object>> dataMapList = executeQuery(currentCondition);
             if (dataMapList.isEmpty()) {
                 log.warn("{} dataMapList is empty", currentCondition);
@@ -48,7 +49,7 @@ public class DataQuery {
 
             final Map<Column, List<Column>> referenced =
                     tableRelationRegistry.getDirectReferenced(currentCondition.getSchema(), currentCondition.getTable());
-            log.debug("schema:{} table:{} referenced tables:{} ", currentCondition.getSchema(), currentCondition.getTable(),
+            log.info("schema:{} table:{} referenced tables:{} ", currentCondition.getSchema(), currentCondition.getTable(),
                     referenced);
 
             resultMap.put(currentCondition.getTable(), dataMapList);
@@ -93,6 +94,7 @@ public class DataQuery {
                     if (StringUtils.isNotBlank(referencedColumn.condition())) {
                         innerQueryCondition.addCustomizeConditionSql(referencedColumn.condition());
                     }
+                    log.info("enqueue queryCondition:{}", innerQueryCondition);
                     queue.add(innerQueryCondition);
                 }
             }

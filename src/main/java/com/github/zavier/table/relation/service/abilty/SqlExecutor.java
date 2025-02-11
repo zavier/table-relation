@@ -5,7 +5,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -19,14 +18,12 @@ public class SqlExecutor {
         String limitSql = wrapLimit2Sql(sql);
         final JdbcTemplate jdbcTemplate = getJdbcTemplate(dataSource);
         final List<Map<String, Object>> result = jdbcTemplate.queryForList(limitSql, args);
-        log.info("sqlQueryWithLimit sql: {} args: {} resultSize:{}", limitSql, Arrays.toString(args), result.size());
         return result;
     }
 
     public List<Map<String, Object>> sqlQueryWithoutLimit(DataSource dataSource, String sql, Object... args) {
         final JdbcTemplate jdbcTemplate = getJdbcTemplate(dataSource);
         final List<Map<String, Object>> result = jdbcTemplate.queryForList(sql, args);
-        log.info("sqlQueryWithoutLimit sql: {} args: {} resultSize:{}", sql, Arrays.toString(args), result.size());
         return result;
     }
 
