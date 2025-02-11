@@ -1,7 +1,5 @@
 package com.github.zavier.table.relation.service.dto;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -11,7 +9,7 @@ public class QueryCondition {
     private String schema;
     private String table;
     private List<Condition> conditions;
-    private String customizeConditionSql;
+    private List<String> customizeConditionSqlList;
 
     public String buildSql() {
         final String schema = this.getSchema();
@@ -34,8 +32,10 @@ public class QueryCondition {
                 }
             }
         }
-        if (StringUtils.isNotBlank(this.getCustomizeConditionSql())) {
-            sql.append(" and ").append(this.getCustomizeConditionSql());
+        if (customizeConditionSqlList != null && !customizeConditionSqlList.isEmpty()) {
+            customizeConditionSqlList.forEach(customizeSql -> {
+                sql.append(" and ").append(customizeSql);
+            });
         }
         return sql.toString();
     }
@@ -79,13 +79,13 @@ public class QueryCondition {
         this.conditions = conditions;
     }
 
-    public String getCustomizeConditionSql() {
-        return customizeConditionSql;
+    public void addCustomizeConditionSql(String customizeConditionSql) {
+        if (this.customizeConditionSqlList == null) {
+            this.customizeConditionSqlList = new ArrayList<>();
+        }
+        this.customizeConditionSqlList.add(customizeConditionSql);
     }
 
-    public void setCustomizeConditionSql(String customizeConditionSql) {
-        this.customizeConditionSql = customizeConditionSql;
-    }
 
     @Override
     public String toString() {
@@ -93,7 +93,7 @@ public class QueryCondition {
                 "schema='" + schema + '\'' +
                 ", table='" + table + '\'' +
                 ", conditions=" + conditions +
-                ", customizeConditionSql='" + customizeConditionSql + '\'' +
+                ", customizeConditionSqlList=" + customizeConditionSqlList +
                 '}';
     }
 }

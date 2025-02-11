@@ -71,40 +71,40 @@ class RelationManagerServiceIntegrateTest {
                   dept_emp ||--o{ departments : "dept_no → dept_no"
                   dept_manager ||--o{ departments : "dept_no → dept_no"
                   dept_manager {
-                      int emp_no
-                      string dept_no
-                      date from_date
-                      date to_date
+                      emp_no int
+                      dept_no string
+                      from_date date
+                      to_date date
                   }
                   dept_emp {
-                      int emp_no
-                      string dept_no
-                      date from_date
-                      date to_date
+                      emp_no int
+                      dept_no string
+                      from_date date
+                      to_date date
                   }
                   departments {
-                      string dept_no
-                      string dept_name
+                      dept_no string
+                      dept_name string
                   }
                   employees {
-                      int emp_no
-                      date birth_date
-                      string first_name
-                      string last_name
-                      enum gender
-                      date hire_date
+                      emp_no int
+                      birth_date date
+                      first_name string
+                      last_name string
+                      gender enum
+                      hire_date date
                   }
                   titles {
-                      int emp_no
-                      string title
-                      date from_date
-                      date to_date
+                      emp_no int
+                      title string
+                      from_date date
+                      to_date date
                   }
                   salaries {
-                      int emp_no
-                      int salary
-                      date from_date
-                      date to_date
+                      emp_no int
+                      salary int
+                      from_date date
+                      to_date date
                   }
                 """.strip();
         assertEquals(expected, erDiagram);

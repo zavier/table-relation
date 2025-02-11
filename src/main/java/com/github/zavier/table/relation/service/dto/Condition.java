@@ -29,4 +29,13 @@ public class Condition {
     public void setValue(Object value) {
         this.value = value;
     }
+
+    @Override
+    public String toString() {
+        return "Condition{" +
+                "field='" + field + '\'' +
+                ", operator='" + operator + '\'' +
+                ", value=" + value +
+                '}';
+    }
 }
