@@ -9,6 +9,7 @@ import com.github.zavier.table.relation.service.dto.QueryCondition;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
@@ -25,6 +26,9 @@ public class DataQuery {
     private SqlExecutor sqlExecutor;
     @Resource
     private TableRelationRegistry tableRelationRegistry;
+
+    @Value("${logic.no.delete.condition}")
+    private String logicNoDeleteCondition;
 
     public Map<String, List<Map<String, Object>>> query(QueryCondition queryCondition) {
         return queryByBfs(queryCondition);
@@ -52,7 +56,8 @@ public class DataQuery {
             log.info("schema:{} table:{} referenced tables:{} ", currentCondition.getSchema(), currentCondition.getTable(),
                     referenced);
 
-            resultMap.put(currentCondition.getTable(), dataMapList);
+            // 取对应表第一次查询到的数据
+            resultMap.putIfAbsent(currentCondition.getTable(), dataMapList);
             for (Map.Entry<Column, List<Column>> entry : referenced.entrySet()) {
                 final Column column = entry.getKey();
                 final String columnName = column.columnName();
@@ -109,6 +114,12 @@ public class DataQuery {
         if (sourceOptional.isEmpty()) {
             throw new RuntimeException("dataSource not found:" + schema);
         }
+
+        // 增加逻辑删除条件
+        if (StringUtils.isNotBlank(logicNoDeleteCondition)) {
+            queryCondition.setLogicNoDeleteCondition(logicNoDeleteCondition);
+        }
+
         final DataSource dataSource = sourceOptional.get();
         return sqlExecutor.sqlQueryWithLimit(dataSource, queryCondition.buildSql());
     }

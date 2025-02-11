@@ -1,5 +1,7 @@
 package com.github.zavier.table.relation.service.dto;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -10,6 +12,7 @@ public class QueryCondition {
     private String table;
     private List<Condition> conditions;
     private List<String> customizeConditionSqlList;
+    private String logicNoDeleteCondition;
 
     public String buildSql() {
         final String schema = this.getSchema();
@@ -36,6 +39,9 @@ public class QueryCondition {
             customizeConditionSqlList.forEach(customizeSql -> {
                 sql.append(" and ").append(customizeSql);
             });
+        }
+        if (StringUtils.isNotBlank(logicNoDeleteCondition)) {
+            sql.append(" and ").append(logicNoDeleteCondition);
         }
         return sql.toString();
     }
@@ -86,6 +92,9 @@ public class QueryCondition {
         this.customizeConditionSqlList.add(customizeConditionSql);
     }
 
+    public void setLogicNoDeleteCondition(String logicNoDeleteCondition) {
+        this.logicNoDeleteCondition = logicNoDeleteCondition;
+    }
 
     @Override
     public String toString() {
@@ -94,6 +103,7 @@ public class QueryCondition {
                 ", table='" + table + '\'' +
                 ", conditions=" + conditions +
                 ", customizeConditionSqlList=" + customizeConditionSqlList +
+                ", logicNoDeleteCondition='" + logicNoDeleteCondition + '\'' +
                 '}';
     }
 }
