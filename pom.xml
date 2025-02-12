@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.github.zavier</groupId>
 	<artifactId>table-relation</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1</version>
 	<name>table-relation</name>
 	<description>表关系管理工具</description>
 	<url/>
