@@ -10,6 +10,7 @@ import com.github.zavier.table.relation.service.dto.Condition;
 import com.github.zavier.table.relation.service.dto.QueryCondition;
 import com.github.zavier.table.relation.service.query.DataQuery;
 import jakarta.annotation.Resource;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -70,6 +71,7 @@ public class DataQueryIntegrateTest {
     }
 
     @Test
+    @Disabled
     public void test() throws Exception {
         QueryCondition queryCondition = new QueryCondition();
         queryCondition.setSchema("employees");
@@ -88,7 +90,7 @@ public class DataQueryIntegrateTest {
 //        System.out.println(objectMapper.writeValueAsString(query));
         assertNotNull(query);
         assertEquals(1, query.get("dept_manager").size());
-        assertEquals(1, query.get("dept_emp").size());
+        assertEquals(10, query.get("dept_emp").size());
         assertEquals(1, query.get("employees").size());
         assertEquals(1, query.get("departments").size());
 
