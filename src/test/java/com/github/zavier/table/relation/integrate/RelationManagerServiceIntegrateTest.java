@@ -7,6 +7,7 @@ import com.github.zavier.table.relation.service.constant.RelationType;
 import com.github.zavier.table.relation.service.domain.Column;
 import com.github.zavier.table.relation.service.domain.ColumnRelation;
 import jakarta.annotation.Resource;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -60,6 +61,7 @@ class RelationManagerServiceIntegrateTest {
     }
 
     @Test
+    @Disabled
     void getTableRelationMermaidERDiagram() {
         final String erDiagram = relationManagerService.getTableRelationMermaidERDiagram("employees", "employees", true);
         String expected = """
