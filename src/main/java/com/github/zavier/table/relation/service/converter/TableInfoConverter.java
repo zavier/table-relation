@@ -60,13 +60,23 @@ public class TableInfoConverter {
         if (compareColumnType.startsWith("enum")) {
             return "enum";
         }
-        if (compareColumnType.startsWith("char") || compareColumnType.startsWith("varchar")) {
+        if (compareColumnType.startsWith("char")
+                || compareColumnType.startsWith("varchar")
+                || compareColumnType.startsWith("text")
+                || compareColumnType.startsWith("longtext")
+                || compareColumnType.startsWith("mediumtext")) {
             return "string";
         }
-        if (compareColumnType.startsWith("int") || compareColumnType.startsWith("tinyint") || compareColumnType.startsWith("smallint") || compareColumnType.startsWith("mediumint") || compareColumnType.startsWith("bigint")) {
+        if (compareColumnType.startsWith("int")
+                || compareColumnType.startsWith("tinyint")
+                || compareColumnType.startsWith("smallint")
+                || compareColumnType.startsWith("mediumint")
+                || compareColumnType.startsWith("bigint")) {
             return "int";
         }
-        if (compareColumnType.startsWith("float") || compareColumnType.startsWith("double") || compareColumnType.startsWith("decimal")) {
+        if (compareColumnType.startsWith("float")
+                || compareColumnType.startsWith("double")
+                || compareColumnType.startsWith("decimal")) {
             return "float";
         }
         return compareColumnType;
