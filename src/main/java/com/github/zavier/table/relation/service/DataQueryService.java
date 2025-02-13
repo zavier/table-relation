@@ -12,6 +12,7 @@ import com.github.zavier.table.relation.service.dto.TableData;
 import com.github.zavier.table.relation.service.query.DataQuery;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.Validate;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
@@ -73,6 +74,33 @@ public class DataQueryService {
         final Map<String, Map<String, List<Map<String, Object>>>> schemaTableDataMap = dataQuery.query(queryCondition);
 
         // schema -> table -> col -> comment
+        final Map<String, Map<String, Map<String, String>>> comments = getSchemaTableCommentMap(schemaTableDataMap);
+
+        final Map<String, List<Map<String, Object>>> dataMap = mergerSchemaData(schemaTableDataMap);
+        final Map<String, Map<String, String>> commentMap = mergerSchemaComment(comments);
+
+        // 原始表名的数据再保留一份，用作前端主数据展示
+        addSearchTableKeyIfNotExist(queryCondition, dataMap, commentMap);
+
+        return Result.success(new TableData(dataMap, commentMap));
+    }
+
+    private static void addSearchTableKeyIfNotExist(QueryCondition queryCondition, Map<String, List<Map<String, Object>>> dataMap, Map<String, Map<String, String>> commentMap) {
+        if (!dataMap.containsKey(queryCondition.getTable())) {
+            final List<Map<String, Object>> maps = dataMap.get(queryCondition.getSchema() + "." + queryCondition.getTable());
+            if (maps != null) {
+                dataMap.put(queryCondition.getTable(), maps);
+            }
+        }
+        if (!commentMap.containsKey(queryCondition.getTable())) {
+            final Map<String, String> columnCommentMap = commentMap.get(queryCondition.getSchema() + "." + queryCondition.getTable());
+            if (columnCommentMap != null) {
+                commentMap.put(queryCondition.getTable(), columnCommentMap);
+            }
+        }
+    }
+
+    private @NotNull Map<String, Map<String, Map<String, String>>> getSchemaTableCommentMap(Map<String, Map<String, List<Map<String, Object>>>> schemaTableDataMap) {
         Map<String, Map<String, Map<String, String>>> comments = new HashMap<>();
         schemaTableDataMap.forEach((schema, tableDataMap) -> {
             final Map<String, Map<String, String>> tableColumnMap = comments.getOrDefault(schema, new HashMap<>());
@@ -86,17 +114,7 @@ public class DataQueryService {
             });
             comments.put(schema, tableColumnMap);
         });
-
-        final Map<String, List<Map<String, Object>>> dataMap = mergerSchemaData(schemaTableDataMap);
-        final Map<String, Map<String, String>> commentMap = mergerSchemaComment(comments);
-
-        // 原始表名的数据再保留一份，用作前端主数据展示
-        if (!dataMap.containsKey(queryCondition.getTable())) {
-            final List<Map<String, Object>> maps = dataMap.get(queryCondition.getSchema() + "." + queryCondition.getTable());
-            dataMap.put(queryCondition.getTable(), maps);
-        }
-
-        return Result.success(new TableData(dataMap, commentMap));
+        return comments;
     }
 
 
