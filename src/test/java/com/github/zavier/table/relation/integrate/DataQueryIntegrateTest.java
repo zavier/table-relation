@@ -17,8 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 public class DataQueryIntegrateTest {
@@ -86,13 +85,16 @@ public class DataQueryIntegrateTest {
         queryCondition.setConditions(List.of(condition));
 
         System.out.println(objectMapper.writeValueAsString(queryCondition));
-        final Map<String, List<Map<String, Object>>> query = dataQuery.query(queryCondition);
+        final Map<String, Map<String, List<Map<String, Object>>>> query = dataQuery.query(queryCondition);
 //        System.out.println(objectMapper.writeValueAsString(query));
         assertNotNull(query);
-        assertEquals(1, query.get("dept_manager").size());
-        assertEquals(10, query.get("dept_emp").size());
-        assertEquals(1, query.get("employees").size());
-        assertEquals(1, query.get("departments").size());
+        assertEquals(1, query.size());
+        assertTrue(query.containsKey("employees"));
+        final Map<String, List<Map<String, Object>>> dataMap = query.get("employees");
+        assertEquals(1, dataMap.get("dept_manager").size());
+        assertEquals(10, dataMap.get("dept_emp").size());
+        assertEquals(1, dataMap.get("employees").size());
+        assertEquals(1, dataMap.get("departments").size());
 
     }
 }

@@ -98,20 +98,31 @@ public class RelationManagerService {
 
     public String getTableRelationMermaidERDiagram(String schema, String tableName, Boolean needTableInfo) {
         final List<EntityRelationShip> allReferenced = tableRelationRegistry.getAllReferenced(schema, tableName);
+
+        boolean multiSchema = allReferenced.stream()
+                .map(it -> List.of(it.sourceSchema(), it.targetSchema()))
+                .flatMap(List::stream)
+                .distinct()
+                .count() > 1;
+
         String head = "erDiagram";
         String template = "  %s ||--o{ %s : \"%s\"";
         final StringBuilder builder = new StringBuilder(head);
         // 关系
         Set<String> tables = new HashSet<>();
         for (EntityRelationShip entityRelationship : allReferenced) {
-            tables.add(entityRelationship.sourceTable());
-            tables.add(entityRelationship.targetTable());
+            String sourceTable = multiSchema ? entityRelationship.sourceTableFullPath() : entityRelationship.sourceTable();
+            String targetTable = multiSchema ? entityRelationship.targetTableFullPath() : entityRelationship.targetTable();
 
-            final String format = String.format(template, entityRelationship.sourceTable(), entityRelationship.targetTable(), entityRelationship.label());
+            tables.add(sourceTable);
+            tables.add(targetTable);
+
+            final String format = String.format(template, sourceTable, targetTable, entityRelationship.label());
             builder.append("\n").append(format);
         }
 
-        if (!needTableInfo) {
+        // 表关系不为空，同时选择不需要表信息，才不展示，否则兜底展示表信息
+        if (!needTableInfo && !tables.isEmpty()) {
             return builder.toString();
         }
 
@@ -122,7 +133,8 @@ public class RelationManagerService {
                 continue;
             }
 
-            builder.append("\n").append("  ").append(tableColumnInfo.tableName()).append(" ").append("{");
+            String showTableName = multiSchema ? tableColumnInfo.tableNameFullPath() : tableColumnInfo.tableName();
+            builder.append("\n").append("  ").append(showTableName).append(" ").append("{");
             for (ColumnInfo columnInfo : tableColumnInfo.columns()) {
                 builder.append("\n")
                         .append("      ")

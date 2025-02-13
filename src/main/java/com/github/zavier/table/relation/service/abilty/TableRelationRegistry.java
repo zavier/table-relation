@@ -103,10 +103,13 @@ public class TableRelationRegistry {
                 }
 
                 String label = labelBuilder.toString();
-                relationships.add(new EntityRelationShip(column.tableName(), referencedColumn.tableName(), label));
+                relationships.add(new EntityRelationShip(column.schema(),
+                        column.tableName(),
+                        referencedColumn.schema(),
+                        referencedColumn.tableName(),
+                        label));
             }
         }
-
         return relationships;
     }
 

@@ -69,21 +69,61 @@ public class DataQueryService {
     public Result<TableData> queryTableData(QueryCondition queryCondition) {
         checkParam(queryCondition);
 
-        // table -> list<col, value>
-        final Map<String, List<Map<String, Object>>> tableData = dataQuery.query(queryCondition);
+        // schema -> table -> list<col, value>
+        final Map<String, Map<String, List<Map<String, Object>>>> schemaTableDataMap = dataQuery.query(queryCondition);
 
-        // table -> col -> comment
-        Map<String, Map<String, String>> comments = new HashMap<>();
-        final Set<String> tableNameSet = tableData.keySet();
-        tableNameSet.forEach(tableName -> {
-            final TableColumnInfo columnInfo = getTableColumnInfo(queryCondition.getSchema(), tableName);
-            final Map<String, String> commentMap = new HashMap<>();
-            columnInfo.columns().forEach(column -> {
-                commentMap.put(column.columnName(), column.columnComment());
+        // schema -> table -> col -> comment
+        Map<String, Map<String, Map<String, String>>> comments = new HashMap<>();
+        schemaTableDataMap.forEach((schema, tableDataMap) -> {
+            final Map<String, Map<String, String>> tableColumnMap = comments.getOrDefault(schema, new HashMap<>());
+            tableDataMap.forEach((tableName, dataMapList) -> {
+                final TableColumnInfo columnInfo = getTableColumnInfo(schema, tableName);
+                final Map<String, String> commentMap = new HashMap<>();
+                columnInfo.columns().forEach(column -> {
+                    commentMap.put(column.columnName(), column.columnComment());
+                });
+                tableColumnMap.put(tableName, commentMap);
             });
-            comments.put(tableName, commentMap);
+            comments.put(schema, tableColumnMap);
         });
-        return Result.success(new TableData(tableData, comments));
+
+        final Map<String, List<Map<String, Object>>> dataMap = mergerSchemaData(schemaTableDataMap);
+        final Map<String, Map<String, String>> commentMap = mergerSchemaComment(comments);
+
+        return Result.success(new TableData(dataMap, commentMap));
+    }
+
+
+    private Map<String, Map<String, String>> mergerSchemaComment(Map<String, Map<String, Map<String, String>>> comments) {
+        if (comments.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        if (comments.size() == 1) {
+            return comments.values().iterator().next();
+        }
+        Map<String, Map<String, String>> result = new HashMap<>();
+        comments.forEach((schema, tableCommentMap) -> {
+            tableCommentMap.forEach((tableName, columnMap) -> {
+                result.put(schema + "." + tableName, columnMap);
+            });
+        });
+        return result;
+    }
+
+    private Map<String, List<Map<String, Object>>> mergerSchemaData(Map<String, Map<String, List<Map<String, Object>>>> schemaTableDataMap) {
+        if (schemaTableDataMap.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        if (schemaTableDataMap.size() == 1) {
+            return schemaTableDataMap.values().iterator().next();
+        }
+        Map<String, List<Map<String, Object>>> result = new HashMap<>();
+        schemaTableDataMap.forEach((schema, tableDataMap) -> {
+            tableDataMap.forEach((tableName, dataMapList) -> {
+                result.put(schema + "." + tableName, dataMapList);
+            });
+        });
+        return result;
     }
 
     private TableColumnInfo getTableColumnInfo(String schema, String tableName) {

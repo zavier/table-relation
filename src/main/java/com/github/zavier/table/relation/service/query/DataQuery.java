@@ -30,16 +30,17 @@ public class DataQuery {
     @Value("${logic.no.delete.condition}")
     private String logicNoDeleteCondition;
 
-    public Map<String, List<Map<String, Object>>> query(QueryCondition queryCondition) {
+    // schema -> table -> list<col, value>
+    public Map<String, Map<String, List<Map<String, Object>>>> query(QueryCondition queryCondition) {
         return queryByBfs(queryCondition);
     }
 
-    private Map<String, List<Map<String, Object>>> queryByBfs(QueryCondition queryCondition) {
+    private Map<String, Map<String, List<Map<String, Object>>>> queryByBfs(QueryCondition queryCondition) {
         Queue<QueryCondition> queue = new LinkedList<>();
         queue.add(queryCondition);
         log.info("enqueue queryCondition:{}", queryCondition);
 
-        Map<String, List<Map<String, Object>>> resultMap = new HashMap<>();
+        Map<String, Map<String, List<Map<String, Object>>>> resultMap = new HashMap<>();
         Set<Column> uniqueKey = new HashSet<>();
 
         while (!queue.isEmpty()) {
@@ -57,7 +58,10 @@ public class DataQuery {
                     referenced);
 
             // 取对应表第一次查询到的数据
-            resultMap.putIfAbsent(currentCondition.getTable(), dataMapList);
+            final Map<String, List<Map<String, Object>>> tableDataMap = resultMap.getOrDefault(currentCondition.getSchema(), new HashMap<>());
+            tableDataMap.putIfAbsent(currentCondition.getTable(), dataMapList);
+            resultMap.put(currentCondition.getSchema(), tableDataMap);
+
             for (Map.Entry<Column, List<Column>> entry : referenced.entrySet()) {
                 final Column column = entry.getKey();
                 final String columnName = column.columnName();
