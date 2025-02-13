@@ -55,11 +55,11 @@ public class DataQueryService {
 
         final TableColumnInfo tableColumnMetaInfo = getTableColumnInfo(schema, tableName);
 
+        // 列就不进行排序了，保留原始顺序，便于页面查看
         final List<String> columnNames = tableColumnMetaInfo.columns()
                 .stream()
                 .map(ColumnInfo::columnName)
                 .distinct()
-                .sorted()
                 .toList();
 
         return Result.success(columnNames);
@@ -89,6 +89,12 @@ public class DataQueryService {
 
         final Map<String, List<Map<String, Object>>> dataMap = mergerSchemaData(schemaTableDataMap);
         final Map<String, Map<String, String>> commentMap = mergerSchemaComment(comments);
+
+        // 原始表名的数据再保留一份，用作前端主数据展示
+        if (!dataMap.containsKey(queryCondition.getTable())) {
+            final List<Map<String, Object>> maps = dataMap.get(queryCondition.getSchema() + "." + queryCondition.getTable());
+            dataMap.put(queryCondition.getTable(), maps);
+        }
 
         return Result.success(new TableData(dataMap, commentMap));
     }

@@ -106,7 +106,7 @@ public class RelationManagerService {
                 .count() > 1;
 
         String head = "erDiagram";
-        String template = "  %s ||--o{ %s : \"%s\"";
+        String template = "  \"%s\" ||--o{ \"%s\" : \"%s\"";
         final StringBuilder builder = new StringBuilder(head);
         // 关系
         Set<String> tables = new HashSet<>();
