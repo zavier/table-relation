@@ -19,7 +19,7 @@
         </encoder>
     </appender>
 
-    <logger name="org.springframework.jdbc.core.JdbcTemplate" level="DEBUG"/>
+<!--    <logger name="org.springframework.jdbc.core.JdbcTemplate" level="DEBUG"/>-->
 
     <root level="INFO">
         <appender-ref ref="FILE"/>

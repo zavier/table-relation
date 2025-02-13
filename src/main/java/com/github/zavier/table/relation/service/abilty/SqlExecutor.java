@@ -1,5 +1,6 @@
 package com.github.zavier.table.relation.service.abilty;
 
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -17,13 +18,17 @@ public class SqlExecutor {
     public List<Map<String, Object>> sqlQueryWithLimit(DataSource dataSource, String sql, Object... args) {
         String limitSql = wrapLimit2Sql(sql);
         final JdbcTemplate jdbcTemplate = getJdbcTemplate(dataSource);
-        final List<Map<String, Object>> result = jdbcTemplate.queryForList(limitSql, args);
-        return result;
+        return queryWithLog(limitSql, args, jdbcTemplate);
     }
 
     public List<Map<String, Object>> sqlQueryWithoutLimit(DataSource dataSource, String sql, Object... args) {
         final JdbcTemplate jdbcTemplate = getJdbcTemplate(dataSource);
+        return queryWithLog(sql, args, jdbcTemplate);
+    }
+
+    private static @NotNull List<Map<String, Object>> queryWithLog(String sql, Object[] args, JdbcTemplate jdbcTemplate) {
         final List<Map<String, Object>> result = jdbcTemplate.queryForList(sql, args);
+        log.info("execute sql:{} args:{} resultSize:{}", sql, args, result.size());
         return result;
     }
 
