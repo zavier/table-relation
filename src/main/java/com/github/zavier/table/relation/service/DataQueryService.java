@@ -37,15 +37,12 @@ public class DataQueryService {
     }
 
     public Result<List<String>> getSchemaTables(String schema) {
-        Validate.notBlank(schema, "schema can not be blank");
-
-        final Optional<DataSource> sourceOptional = dataSourceRegistry.getDataSource(schema);
-        if (sourceOptional.isEmpty()) {
-            return Result.success(List.of());
+        final Result<List<TableColumnInfo>> tableColumnInfoResult = getTableColumnInfos(schema);
+        if (!tableColumnInfoResult.isSuccess()) {
+            return Result.fail(tableColumnInfoResult.getMessage());
         }
-        final DataSource dataSource = sourceOptional.get();
 
-        final List<TableColumnInfo> tableColumnMetaInfo = mySqlTableMetaInfoQuery.getTableColumnMetaInfo(schema, dataSource);
+        var tableColumnMetaInfo = tableColumnInfoResult.getData();
         final List<String> tableNameList = tableColumnMetaInfo.stream().map(TableColumnInfo::tableName)
                 .sorted()
                 .toList();
@@ -53,7 +50,6 @@ public class DataQueryService {
     }
 
     public Result<List<String>> getTableColumns(String schema, String tableName) {
-
         final TableColumnInfo tableColumnMetaInfo = getTableColumnInfo(schema, tableName);
 
         // 列就不进行排序了，保留原始顺序，便于页面查看
@@ -64,6 +60,25 @@ public class DataQueryService {
                 .toList();
 
         return Result.success(columnNames);
+    }
+
+    public Result<List<TableColumnInfo>> getTableColumnInfos(String schema) {
+        Validate.notBlank(schema, "schema can not be blank");
+
+        final Optional<DataSource> sourceOptional = dataSourceRegistry.getDataSource(schema);
+        if (sourceOptional.isEmpty()) {
+            return Result.success(List.of());
+        }
+        final DataSource dataSource = sourceOptional.get();
+
+        return Result.success(mySqlTableMetaInfoQuery.getTableColumnMetaInfo(schema, dataSource));
+    }
+
+    public Result<List<Map<String, Object>>> executeSql(String schema, String sql) {
+        Validate.notBlank(schema, "schema can not be blank");
+        Validate.notBlank(sql, "sql can not be blank");
+        final List<Map<String, Object>> maps = dataQuery.queryBySql(schema, sql);
+        return Result.success(maps);
     }
 
 
