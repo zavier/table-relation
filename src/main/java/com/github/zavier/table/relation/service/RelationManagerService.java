@@ -134,7 +134,7 @@ public class RelationManagerService {
             }
 
             String showTableName = multiSchema ? tableColumnInfo.tableNameFullPath() : tableColumnInfo.tableName();
-            builder.append("\n").append("  ").append(showTableName).append(" ").append("{");
+            builder.append("\n").append("  \"").append(showTableName).append("\" ").append("{");
             for (ColumnInfo columnInfo : tableColumnInfo.columns()) {
                 builder.append("\n")
                         .append("      ")
