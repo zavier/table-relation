@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class RelationManagerService {
@@ -99,11 +100,11 @@ public class RelationManagerService {
     public String getTableRelationMermaidERDiagram(String schema, String tableName, Boolean needTableInfo) {
         final List<EntityRelationShip> allReferenced = tableRelationRegistry.getAllReferenced(schema, tableName);
 
-        boolean multiSchema = allReferenced.stream()
+        final Set<String> schemaSet = allReferenced.stream()
                 .map(it -> List.of(it.sourceSchema(), it.targetSchema()))
                 .flatMap(List::stream)
-                .distinct()
-                .count() > 1;
+                .collect(Collectors.toSet());
+        boolean multiSchema = schemaSet.size() > 1;
 
         String head = "erDiagram";
         String template = "  \"%s\" ||--o{ \"%s\" : \"%s\"";
@@ -127,40 +128,46 @@ public class RelationManagerService {
         }
 
         // 表信息
-        final List<TableColumnInfo> schemaAllTableInfo = getSchemaAllTableInfo(schema);
-        for (TableColumnInfo tableColumnInfo : schemaAllTableInfo) {
-            if (!needGenerate(tableColumnInfo, tables, tableName)) {
-                continue;
-            }
-
-            String showTableName = multiSchema ? tableColumnInfo.tableNameFullPath() : tableColumnInfo.tableName();
-            builder.append("\n").append("  \"").append(showTableName).append("\" ").append("{");
-            for (ColumnInfo columnInfo : tableColumnInfo.columns()) {
-                builder.append("\n")
-                        .append("      ")
-                        .append(columnInfo.columnName())
-                        .append(" ")
-                        .append(columnInfo.columnType());
-                if (StringUtils.isNotBlank(columnInfo.columnComment())) {
-                    builder.append(" ")
-                            .append("\"")
-                            .append(columnInfo.columnComment())
-                            .append("\"");
+        for (String schemaName : schemaSet) {
+            final List<TableColumnInfo> schemaAllTableInfo = getSchemaAllTableInfo(schemaName);
+            for (TableColumnInfo tableColumnInfo : schemaAllTableInfo) {
+                if (!needGenerate(tableColumnInfo, tables, tableName, multiSchema)) {
+                    continue;
                 }
+
+                String showTableName = multiSchema ? tableColumnInfo.tableNameFullPath() : tableColumnInfo.tableName();
+                builder.append("\n").append("  \"").append(showTableName).append("\" ").append("{");
+                for (ColumnInfo columnInfo : tableColumnInfo.columns()) {
+                    builder.append("\n")
+                            .append("      ")
+                            .append(columnInfo.columnName())
+                            .append(" ")
+                            .append(columnInfo.columnType());
+                    if (StringUtils.isNotBlank(columnInfo.columnComment())) {
+                        builder.append(" ")
+                                .append("\"")
+                                .append(columnInfo.columnComment())
+                                .append("\"");
+                    }
+                }
+                builder.append("\n").append("  }");
             }
-            builder.append("\n").append("  }");
         }
 
         return builder.toString();
     }
 
-    private static boolean needGenerate(TableColumnInfo tableColumnInfo, Set<String> tables, String selectedTableName) {
+    private static boolean needGenerate(TableColumnInfo tableColumnInfo,
+                                        Set<String> tables,
+                                        String selectedTableName,
+                                        boolean multiSchema) {
         // 如果没有关联表，则只展示选择的表信息即可
         if (tables.isEmpty()) {
             return tableColumnInfo.tableName().equals(selectedTableName);
         }
         // 否则按找关系筛选
-        return tables.contains(tableColumnInfo.tableName());
+        String showTableName = multiSchema ? tableColumnInfo.tableNameFullPath() : tableColumnInfo.tableName();
+        return tables.contains(showTableName);
     }
 
     private List<TableColumnInfo> getSchemaAllTableInfo(String schema) {
