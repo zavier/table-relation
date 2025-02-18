@@ -1,7 +1,8 @@
 package com.github.zavier.table.relation.web;
 
 import com.github.zavier.table.relation.manager.RelationShipManager;
-import com.github.zavier.table.relation.service.domain.ColumnUsage;
+import com.github.zavier.table.relation.manager.ai.TableRelationAnalyzer;
+import com.github.zavier.table.relation.service.dto.ColumnUsage;
 import com.github.zavier.table.relation.service.dto.Result;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,8 @@ public class RelationManagerController {
 
     @Resource
     private RelationShipManager relationShipManager;
+    @Resource
+    private TableRelationAnalyzer tableRelationAnalyzer;
 
     @GetMapping("/list")
     public Result<List<ColumnUsage>> listAllDataSource() {
@@ -22,7 +25,7 @@ public class RelationManagerController {
 
     @PostMapping("/update")
     public Result<Boolean> updateDataSource(@RequestBody ColumnUsage dataSourceConfig) {
-        relationShipManager.updateColumnUsage(dataSourceConfig);
+        relationShipManager.refreshColumnUsage(dataSourceConfig);
         return Result.success(true);
     }
 

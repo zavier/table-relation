@@ -2,7 +2,7 @@ package com.github.zavier.table.relation.web;
 
 import com.github.zavier.table.relation.manager.DataQueryManager;
 import com.github.zavier.table.relation.manager.RelationShipManager;
-import com.github.zavier.table.relation.manager.ai.SqlGenerateManager;
+import com.github.zavier.table.relation.manager.ai.SqlGenerator;
 import com.github.zavier.table.relation.service.dto.ExecuteSqlDto;
 import com.github.zavier.table.relation.service.dto.QueryCondition;
 import com.github.zavier.table.relation.service.dto.Result;
@@ -25,7 +25,7 @@ public class DataController {
     @Resource
     private RelationShipManager relationShipManager;
     @Resource
-    private SqlGenerateManager sqlGenerateManager;
+    private SqlGenerator sqlGenerator;
 
     @GetMapping("/allSchema")
     public Result<List<String>> getAllSchema() {
@@ -44,10 +44,9 @@ public class DataController {
 
     @GetMapping("/generateSql")
     public Result<String> generateSql(@RequestParam("schema") String schema, @RequestParam("demand") String demand) {
-        return Result.success(sqlGenerateManager.generateSql(schema, demand));
+        return Result.success(sqlGenerator.generateSql(schema, demand));
     }
 
-    // executeSql
     @PostMapping("/executeSql")
     public Result<List<Map<String, Object>>> executeSql(@RequestBody ExecuteSqlDto executeSqlDto) {
         return dataQueryManager.executeSql(executeSqlDto.getSchema(), executeSqlDto.getSql());

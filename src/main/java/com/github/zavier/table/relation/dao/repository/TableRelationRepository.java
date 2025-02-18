@@ -3,7 +3,7 @@ package com.github.zavier.table.relation.dao.repository;
 import com.github.zavier.table.relation.dao.entity.TableRelation;
 import com.github.zavier.table.relation.dao.mapper.TableRelationMapper;
 import com.github.zavier.table.relation.service.constant.RelationType;
-import com.github.zavier.table.relation.service.domain.ColumnUsage;
+import com.github.zavier.table.relation.service.dto.ColumnUsage;
 import jakarta.annotation.Resource;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Repository;

@@ -3,7 +3,7 @@ package com.github.zavier.table.relation.service.extpt;
 import com.github.zavier.table.relation.service.SqlExecutor;
 import com.github.zavier.table.relation.service.converter.ColumnUsageConverter;
 import com.github.zavier.table.relation.service.converter.TableInfoConverter;
-import com.github.zavier.table.relation.service.domain.ColumnUsage;
+import com.github.zavier.table.relation.service.dto.ColumnUsage;
 import com.github.zavier.table.relation.service.domain.TableColumnInfo;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.Validate;

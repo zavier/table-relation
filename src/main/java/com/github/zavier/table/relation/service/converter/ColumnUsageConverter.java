@@ -1,7 +1,7 @@
 package com.github.zavier.table.relation.service.converter;
 
 import com.github.zavier.table.relation.service.constant.RelationType;
-import com.github.zavier.table.relation.service.domain.ColumnUsage;
+import com.github.zavier.table.relation.service.dto.ColumnUsage;
 
 import java.util.Map;
 

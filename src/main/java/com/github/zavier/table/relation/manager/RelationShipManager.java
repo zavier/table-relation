@@ -1,11 +1,13 @@
 package com.github.zavier.table.relation.manager;
 
 import com.github.zavier.table.relation.dao.repository.TableRelationRepository;
+import com.github.zavier.table.relation.manager.ai.TableRelationAnalyzer;
 import com.github.zavier.table.relation.service.DataSourceRegistry;
+import com.github.zavier.table.relation.service.constant.RelationType;
 import com.github.zavier.table.relation.service.extpt.MySqlTableMetaInfoQuery;
 import com.github.zavier.table.relation.service.TableRelationRegistry;
 import com.github.zavier.table.relation.service.domain.ColumnInfo;
-import com.github.zavier.table.relation.service.domain.ColumnUsage;
+import com.github.zavier.table.relation.service.dto.ColumnUsage;
 import com.github.zavier.table.relation.service.domain.TableColumnInfo;
 import com.github.zavier.table.relation.service.dto.EntityRelationShip;
 import jakarta.annotation.Resource;
@@ -13,10 +15,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,6 +38,13 @@ public class RelationShipManager {
     private TableRelationRegistry tableRelationRegistry;
     @Resource
     private MySqlTableMetaInfoQuery mySqlTableMetaInfoQuery;
+    @Resource
+    private TableRelationAnalyzer tableRelationAnalyzer;
+
+    @Value("${analyze.column.usage.auto}")
+    private boolean isAutoAnalyze;
+
+    private final ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor();
 
     public List<ColumnUsage> listAllColumnUsage() {
         return tableRelationRepository.listAllTableRelation();
@@ -61,6 +72,35 @@ public class RelationShipManager {
         refreshRegistry();
     }
 
+    private void batchAddColumnUsage(List<ColumnUsage> columnUsages) {
+        // 是否已存在
+        final List<ColumnUsage> existAllColumnUsageList = listAllColumnUsage();
+        if (!existAllColumnUsageList.isEmpty()) {
+            for (ColumnUsage columnUsage : columnUsages) {
+                try {
+                    checkParam(columnUsage);
+                    final boolean exist = existAllColumnUsageList.stream()
+                            .anyMatch(it -> Objects.equals(it.getTableSchema(), columnUsage.getTableSchema())
+                                    && Objects.equals(it.getTableName(), columnUsage.getTableName())
+                                    && Objects.equals(it.getColumnName(), columnUsage.getColumnName())
+                                    && Objects.equals(it.getCondition(), columnUsage.getCondition())
+                                    && Objects.equals(it.getReferencedTableSchema(), columnUsage.getReferencedTableSchema())
+                                    && Objects.equals(it.getReferencedTableName(), columnUsage.getReferencedTableName())
+                                    && Objects.equals(it.getReferencedColumnName(), columnUsage.getReferencedColumnName())
+                            );
+                    if (exist) {
+                        log.warn("table relation already exists, skip it : {}", columnUsage);
+                        continue;
+                    }
+                    tableRelationRepository.addTableRelation(columnUsage);
+                } catch (Exception e) {
+                    log.error("Failed to add table relation:{}", columnUsage, e);
+                }
+            }
+        }
+        refreshRegistry();
+    }
+
     public void deleteColumnUsage(Integer id) {
         Validate.notNull(id, "id can not be null");
         tableRelationRepository.deleteTableRelation(id);
@@ -68,7 +108,7 @@ public class RelationShipManager {
         refreshRegistry();
     }
 
-    public void updateColumnUsage(ColumnUsage columnUsage) {
+    public void refreshColumnUsage(ColumnUsage columnUsage) {
         checkParam(columnUsage);
         Validate.notNull(columnUsage.getId(), "id can not be null");
 
@@ -82,7 +122,7 @@ public class RelationShipManager {
         initializer.refreshTableRelation();
     }
 
-    public void updateColumnUsage(String tableSchema) {
+    public void refreshColumnUsage(String tableSchema) {
         final Optional<DataSource> sourceOptional = dataSourceRegistry.getDataSource(tableSchema);
         Validate.isTrue(sourceOptional.isPresent(), "dataSource not found:" + tableSchema);
         final DataSource dataSource = sourceOptional.get();
@@ -90,11 +130,45 @@ public class RelationShipManager {
         final List<ColumnUsage> existColumnUsages = tableRelationRepository.listTableRelation(tableSchema);
 
         final List<ColumnUsage> thisColumnUsageList = mySqlTableMetaInfoQuery.getTableRelationMetaInfo(tableSchema, dataSource);
-        thisColumnUsageList.forEach(thisUsage -> {
-            if (!contains(existColumnUsages, thisUsage)) {
-                tableRelationRepository.addTableRelation(thisUsage);
+
+        if (!thisColumnUsageList.isEmpty()) {
+            thisColumnUsageList.forEach(thisUsage -> {
+                if (!contains(existColumnUsages, thisUsage)) {
+                    tableRelationRepository.addTableRelation(thisUsage);
+                }
+            });
+        } else {
+            executorService.execute(() -> analyzeByLlmAndSaveResult(tableSchema));
+        }
+    }
+
+    private void analyzeByLlmAndSaveResult(String schema) {
+        if (!isAutoAnalyze) {
+            return;
+        }
+        // 如果开启大模型自动分析，则会分析后进行保存
+        try {
+            log.info("auto analyze table relation for schema:{}", schema);
+            final String tableMermaidERDiagram = this.getTableMermaidERDiagram(schema);
+            final List<ColumnUsage> columnUsages = tableRelationAnalyzer.analyzeTableRelation(tableMermaidERDiagram);
+            if (columnUsages == null) {
+                log.warn("analyze table relation result is empty");
+                return;
             }
-        });
+            log.info("analyze columnUsages result size:{} data:{}", columnUsages.size(), columnUsages);
+            // 数据预处理一下
+            columnUsages.forEach(it -> {
+                it.setId(null);
+                it.setCondition("");
+                it.setTableSchema(schema);
+                it.setReferencedTableSchema(schema);
+                // default
+                it.setRelationType(RelationType.ONE_TO_MANY.getValue());
+            });
+            batchAddColumnUsage(columnUsages);
+        } catch (Exception e) {
+            log.error("analyze table relation error", e);
+        }
     }
 
     public String getTableRelationMermaidERDiagram(String schema, String tableName, Boolean needTableInfo) {
@@ -104,6 +178,11 @@ public class RelationShipManager {
                 .map(it -> List.of(it.sourceSchema(), it.targetSchema()))
                 .flatMap(List::stream)
                 .collect(Collectors.toSet());
+        // 如果此时关系未维护，则使用当前schema
+        if (schemaSet.isEmpty()) {
+            schemaSet.add(schema);
+        }
+
         boolean multiSchema = schemaSet.size() > 1;
 
         String head = "erDiagram";
@@ -136,25 +215,40 @@ public class RelationShipManager {
                 }
 
                 String showTableName = multiSchema ? tableColumnInfo.tableNameFullPath() : tableColumnInfo.tableName();
-                builder.append("\n").append("  \"").append(showTableName).append("\" ").append("{");
-                for (ColumnInfo columnInfo : tableColumnInfo.columns()) {
-                    builder.append("\n")
-                            .append("      ")
-                            .append(columnInfo.columnName())
-                            .append(" ")
-                            .append(columnInfo.columnType());
-                    if (StringUtils.isNotBlank(columnInfo.columnComment())) {
-                        builder.append(" ")
-                                .append("\"")
-                                .append(columnInfo.columnComment())
-                                .append("\"");
-                    }
-                }
-                builder.append("\n").append("  }");
+                appendTableErDiagramInfo(tableColumnInfo, builder, showTableName);
             }
         }
 
         return builder.toString();
+    }
+
+    public String getTableMermaidERDiagram(String schemaName) {
+        final List<TableColumnInfo> schemaAllTableInfo = getSchemaAllTableInfo(schemaName);
+        String head = "erDiagram";
+        final StringBuilder builder = new StringBuilder(head);
+        for (TableColumnInfo tableColumnInfo : schemaAllTableInfo) {
+            String showTableName = tableColumnInfo.tableName();
+            appendTableErDiagramInfo(tableColumnInfo, builder, showTableName);
+        }
+        return builder.toString();
+    }
+
+    private static void appendTableErDiagramInfo(TableColumnInfo tableColumnInfo, StringBuilder builder, String showTableName) {
+        builder.append("\n").append("  \"").append(showTableName).append("\" ").append("{");
+        for (ColumnInfo columnInfo : tableColumnInfo.columns()) {
+            builder.append("\n")
+                    .append("      ")
+                    .append(columnInfo.columnName())
+                    .append(" ")
+                    .append(columnInfo.columnType());
+            if (StringUtils.isNotBlank(columnInfo.columnComment())) {
+                builder.append(" ")
+                        .append("\"")
+                        .append(columnInfo.columnComment())
+                        .append("\"");
+            }
+        }
+        builder.append("\n").append("  }");
     }
 
     private static boolean needGenerate(TableColumnInfo tableColumnInfo,

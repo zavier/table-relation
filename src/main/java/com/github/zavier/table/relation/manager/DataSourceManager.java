@@ -75,9 +75,10 @@ public class DataSourceManager {
         initializer.refreshTableRelation();
     }
 
+    // TODO event bus
     private void updateTableRelation(String tableSchema) {
         try {
-            relationShipManager.updateColumnUsage(tableSchema);
+            relationShipManager.refreshColumnUsage(tableSchema);
         } catch (Exception e) {
             log.error("refreshColumnUsage tableSchema:{} failed", tableSchema, e);
         }

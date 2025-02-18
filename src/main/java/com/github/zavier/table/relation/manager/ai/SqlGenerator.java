@@ -4,6 +4,7 @@ import com.github.zavier.table.relation.manager.DataQueryManager;
 import com.github.zavier.table.relation.manager.RelationShipManager;
 import com.github.zavier.table.relation.service.domain.TableColumnInfo;
 import com.github.zavier.table.relation.service.dto.Result;
+import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.Nullable;
@@ -16,22 +17,15 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-public class SqlGenerateManager {
+public class SqlGenerator {
 
-    private final ChatClient chatClient;
+    @Resource
+    private ChatClient chatClient;
+    @Resource
+    private DataQueryManager dataQueryManager;
+    @Resource
+    private RelationShipManager relationShipManager;
 
-    private final DataQueryManager dataQueryManager;
-    private final RelationShipManager relationShipManager;
-
-    public SqlGenerateManager(ChatClient.Builder chatClientBuilder,
-                              DataQueryManager dataQueryManager,
-                              RelationShipManager relationShipManager) {
-        this.chatClient = chatClientBuilder
-                .defaultAdvisors(new SimpleLoggerAdvisor())
-                .build();
-        this.dataQueryManager = dataQueryManager;
-        this.relationShipManager = relationShipManager;
-    }
 
     public String generateSql(String schema, String demand) {
         // 考虑使用多个表？

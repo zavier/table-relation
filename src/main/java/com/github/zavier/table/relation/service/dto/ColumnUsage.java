@@ -1,4 +1,4 @@
-package com.github.zavier.table.relation.service.domain;
+package com.github.zavier.table.relation.service.dto;
 
 public class ColumnUsage {
     private Integer id;
@@ -82,5 +82,20 @@ public class ColumnUsage {
 
     public void setRelationType(Integer relationType) {
         this.relationType = relationType;
+    }
+
+    @Override
+    public String toString() {
+        return "ColumnUsage{" +
+                "id=" + id +
+                ", tableSchema='" + tableSchema + '\'' +
+                ", tableName='" + tableName + '\'' +
+                ", columnName='" + columnName + '\'' +
+                ", condition='" + condition + '\'' +
+                ", referencedTableSchema='" + referencedTableSchema + '\'' +
+                ", referencedTableName='" + referencedTableName + '\'' +
+                ", referencedColumnName='" + referencedColumnName + '\'' +
+                ", relationType=" + relationType +
+                '}';
     }
 }
