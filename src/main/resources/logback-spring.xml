@@ -21,6 +21,8 @@
 
 <!--    <logger name="org.springframework.jdbc.core.JdbcTemplate" level="DEBUG"/>-->
 
+    <logger name="org.springframework.ai.chat.client.advisor" level="DEBUG"/>
+
     <root level="INFO">
         <appender-ref ref="FILE"/>
         <appender-ref ref="CONSOLE"/>

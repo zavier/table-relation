@@ -19,15 +19,21 @@ public class MySqlTableMetaInfoQuery {
     private SqlExecutor sqlExecutor;
 
     public List<TableColumnInfo> getTableColumnMetaInfo(String schema, DataSource dataSource) {
-        String sql = "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, COLUMN_COMMENT FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = ?";
-        final List<Map<String, Object>> maps = sqlExecutor.sqlQueryWithoutLimit(dataSource, sql, schema);
-        return TableInfoConverter.convert2TableColumnInfo(maps);
+        String columnSql = "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, COLUMN_COMMENT FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = ?";
+        final List<Map<String, Object>> columnDataList = sqlExecutor.sqlQueryWithoutLimit(dataSource, columnSql, schema);
+
+        String tableSql = "SELECT TABLE_SCHEMA, TABLE_NAME, TABLE_COMMENT FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ?";
+        final List<Map<String, Object>> tableDataList = sqlExecutor.sqlQueryWithoutLimit(dataSource, tableSql, schema);
+        return TableInfoConverter.convert2TableColumnInfo(columnDataList, tableDataList);
     }
 
     public TableColumnInfo getTableColumnMetaInfo(String schema, String table, DataSource dataSource) {
         String sql = "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, COLUMN_COMMENT FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?";
-        final List<Map<String, Object>> maps = sqlExecutor.sqlQueryWithoutLimit(dataSource, sql, schema, table);
-        final List<TableColumnInfo> tableColumnInfos = TableInfoConverter.convert2TableColumnInfo(maps);
+        final List<Map<String, Object>> columnDataList = sqlExecutor.sqlQueryWithoutLimit(dataSource, sql, schema, table);
+
+        String tableSql = "SELECT TABLE_SCHEMA, TABLE_NAME, TABLE_COMMENT FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ?  AND TABLE_NAME = ?";
+        final List<Map<String, Object>> tableDataList = sqlExecutor.sqlQueryWithoutLimit(dataSource, tableSql, schema, table);
+        final List<TableColumnInfo> tableColumnInfos = TableInfoConverter.convert2TableColumnInfo(columnDataList, tableDataList);
 
         Validate.notEmpty(tableColumnInfos, "tableColumnInfos is empty");
         Validate.isTrue(tableColumnInfos.size() == 1, "tableColumnInfos size is not 1");
