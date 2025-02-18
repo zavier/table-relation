@@ -1,8 +1,8 @@
 package com.github.zavier.table.relation.integrate;
 
-import com.github.zavier.table.relation.service.RelationManagerService;
-import com.github.zavier.table.relation.service.abilty.DataSourceRegistry;
-import com.github.zavier.table.relation.service.abilty.TableRelationRegistry;
+import com.github.zavier.table.relation.manager.RelationShipManager;
+import com.github.zavier.table.relation.service.DataSourceRegistry;
+import com.github.zavier.table.relation.service.TableRelationRegistry;
 import com.github.zavier.table.relation.service.constant.RelationType;
 import com.github.zavier.table.relation.service.domain.Column;
 import com.github.zavier.table.relation.service.domain.ColumnRelation;
@@ -14,10 +14,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
-class RelationManagerServiceIntegrateTest {
+class RelationShipManagerIntegrateTest {
 
     @Resource
-    private RelationManagerService relationManagerService;
+    private RelationShipManager relationShipManager;
 
     @Resource
     private DataSourceRegistry dataSourceRegistry;
@@ -63,7 +63,7 @@ class RelationManagerServiceIntegrateTest {
     @Test
     @Disabled
     void getTableRelationMermaidERDiagram() {
-        final String erDiagram = relationManagerService.getTableRelationMermaidERDiagram("employees", "employees", true);
+        final String erDiagram = relationShipManager.getTableRelationMermaidERDiagram("employees", "employees", true);
         String expected = """
                 erDiagram
                   employees ||--o{ dept_emp : "emp_no → emp_no"

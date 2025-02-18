@@ -1,4 +1,6 @@
-package com.github.zavier.table.relation.service.abilty;
+package com.github.zavier.table.relation.manager;
+
+import com.github.zavier.table.relation.service.DataSourceRegistry;
 
 import javax.sql.DataSource;
 import java.util.Optional;

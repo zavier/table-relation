@@ -1,6 +1,5 @@
 package com.github.zavier.table.relation.service;
 
-import com.github.zavier.table.relation.service.abilty.TableRelationRegistry;
 import com.github.zavier.table.relation.service.constant.RelationType;
 import com.github.zavier.table.relation.service.domain.Column;
 import com.github.zavier.table.relation.service.domain.ColumnRelation;

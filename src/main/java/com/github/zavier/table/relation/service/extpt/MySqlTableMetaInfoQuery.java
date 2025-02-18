@@ -1,5 +1,6 @@
-package com.github.zavier.table.relation.service.abilty;
+package com.github.zavier.table.relation.service.extpt;
 
+import com.github.zavier.table.relation.service.SqlExecutor;
 import com.github.zavier.table.relation.service.converter.ColumnUsageConverter;
 import com.github.zavier.table.relation.service.converter.TableInfoConverter;
 import com.github.zavier.table.relation.service.domain.ColumnUsage;

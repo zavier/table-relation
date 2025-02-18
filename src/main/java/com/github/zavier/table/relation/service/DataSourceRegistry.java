@@ -1,4 +1,4 @@
-package com.github.zavier.table.relation.service.abilty;
+package com.github.zavier.table.relation.service;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -19,6 +19,7 @@ public class DataSourceRegistry {
     private Map<String, DataSource> dataSourceMap = new HashMap<>();
 
     public void addDataSource(String name, String url, String username, String password) {
+        log.info("Add DataSource: {} url:{} username:{}", name, url, username);
         final HikariConfig hikariConfig = buildHikariConfig(url, username, password);
 
         final HikariDataSource hikariDataSource = new HikariDataSource(hikariConfig);

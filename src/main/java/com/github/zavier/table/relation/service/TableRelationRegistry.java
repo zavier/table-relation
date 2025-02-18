@@ -1,4 +1,4 @@
-package com.github.zavier.table.relation.service.abilty;
+package com.github.zavier.table.relation.service;
 
 import com.github.zavier.table.relation.service.domain.Column;
 import com.github.zavier.table.relation.service.domain.ColumnRelation;

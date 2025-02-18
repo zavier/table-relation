@@ -1,9 +1,9 @@
-package com.github.zavier.table.relation.service;
+package com.github.zavier.table.relation.manager;
 
 import com.github.zavier.table.relation.dao.repository.TableRelationRepository;
-import com.github.zavier.table.relation.service.abilty.DataSourceRegistry;
-import com.github.zavier.table.relation.service.abilty.MySqlTableMetaInfoQuery;
-import com.github.zavier.table.relation.service.abilty.TableRelationRegistry;
+import com.github.zavier.table.relation.service.DataSourceRegistry;
+import com.github.zavier.table.relation.service.extpt.MySqlTableMetaInfoQuery;
+import com.github.zavier.table.relation.service.TableRelationRegistry;
 import com.github.zavier.table.relation.service.domain.ColumnInfo;
 import com.github.zavier.table.relation.service.domain.ColumnUsage;
 import com.github.zavier.table.relation.service.domain.TableColumnInfo;
@@ -20,9 +20,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class RelationManagerService {
+public class RelationShipManager {
 
-    private static final Logger log = LoggerFactory.getLogger(RelationManagerService.class);
+    private static final Logger log = LoggerFactory.getLogger(RelationShipManager.class);
 
     @Resource
     private TableRelationRepository tableRelationRepository;

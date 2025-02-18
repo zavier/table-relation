@@ -1,4 +1,4 @@
-package com.github.zavier.table.relation.service.abilty;
+package com.github.zavier.table.relation.service;
 
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;

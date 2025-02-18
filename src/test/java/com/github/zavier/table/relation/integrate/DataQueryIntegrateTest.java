@@ -1,14 +1,14 @@
 package com.github.zavier.table.relation.integrate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.zavier.table.relation.service.abilty.DataSourceRegistry;
-import com.github.zavier.table.relation.service.abilty.TableRelationRegistry;
+import com.github.zavier.table.relation.service.DataSourceRegistry;
+import com.github.zavier.table.relation.service.TableRelationRegistry;
 import com.github.zavier.table.relation.service.constant.RelationType;
 import com.github.zavier.table.relation.service.domain.Column;
 import com.github.zavier.table.relation.service.domain.ColumnRelation;
 import com.github.zavier.table.relation.service.dto.Condition;
 import com.github.zavier.table.relation.service.dto.QueryCondition;
-import com.github.zavier.table.relation.service.query.DataQuery;
+import com.github.zavier.table.relation.service.DataQuery;
 import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;

@@ -1,5 +1,7 @@
-package com.github.zavier.table.relation.service;
+package com.github.zavier.table.relation.manager.ai;
 
+import com.github.zavier.table.relation.manager.DataQueryManager;
+import com.github.zavier.table.relation.manager.RelationShipManager;
 import com.github.zavier.table.relation.service.domain.TableColumnInfo;
 import com.github.zavier.table.relation.service.dto.Result;
 import org.apache.commons.lang3.StringUtils;
@@ -14,34 +16,34 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-public class SqlGenerateService {
+public class SqlGenerateManager {
 
     private final ChatClient chatClient;
 
-    private final DataQueryService dataQueryService;
-    private final RelationManagerService relationManagerService;
+    private final DataQueryManager dataQueryManager;
+    private final RelationShipManager relationShipManager;
 
-    public SqlGenerateService(ChatClient.Builder chatClientBuilder,
-                              DataQueryService dataQueryService,
-                              RelationManagerService relationManagerService) {
+    public SqlGenerateManager(ChatClient.Builder chatClientBuilder,
+                              DataQueryManager dataQueryManager,
+                              RelationShipManager relationShipManager) {
         this.chatClient = chatClientBuilder
                 .defaultAdvisors(new SimpleLoggerAdvisor())
                 .build();
-        this.dataQueryService = dataQueryService;
-        this.relationManagerService = relationManagerService;
+        this.dataQueryManager = dataQueryManager;
+        this.relationShipManager = relationShipManager;
     }
 
     public String generateSql(String schema, String demand) {
         // 考虑使用多个表？
         final String useTable = findRelatedUseTable(schema, demand);
 
-        final String erDiagram = relationManagerService.getTableRelationMermaidERDiagram(schema, useTable, true);
+        final String erDiagram = relationShipManager.getTableRelationMermaidERDiagram(schema, useTable, true);
 
         return generateSqlByErDiagram(demand, erDiagram);
     }
 
     private String findRelatedUseTable(String schema, String demand) {
-        final Result<List<TableColumnInfo>> tableColumnInfos = dataQueryService.getTableColumnInfos(schema);
+        final Result<List<TableColumnInfo>> tableColumnInfos = dataQueryManager.getTableColumnInfos(schema);
         Validate.isTrue(tableColumnInfos.isSuccess(), "查询表信息失败");
         Validate.isTrue(!tableColumnInfos.getData().isEmpty(), "表信息不存在");
 

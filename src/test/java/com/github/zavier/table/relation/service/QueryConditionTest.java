@@ -1,5 +1,7 @@
-package com.github.zavier.table.relation.service.dto;
+package com.github.zavier.table.relation.service;
 
+import com.github.zavier.table.relation.service.dto.Condition;
+import com.github.zavier.table.relation.service.dto.QueryCondition;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

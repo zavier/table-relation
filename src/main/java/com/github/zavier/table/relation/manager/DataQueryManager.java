@@ -1,15 +1,15 @@
-package com.github.zavier.table.relation.service;
+package com.github.zavier.table.relation.manager;
 
-import com.github.zavier.table.relation.service.abilty.DataSourceRegistry;
-import com.github.zavier.table.relation.service.abilty.MySqlTableMetaInfoQuery;
-import com.github.zavier.table.relation.service.abilty.SqlExecutor;
+import com.github.zavier.table.relation.service.DataSourceRegistry;
+import com.github.zavier.table.relation.service.extpt.MySqlTableMetaInfoQuery;
+import com.github.zavier.table.relation.service.SqlExecutor;
 import com.github.zavier.table.relation.service.domain.ColumnInfo;
 import com.github.zavier.table.relation.service.domain.TableColumnInfo;
 import com.github.zavier.table.relation.service.dto.Condition;
 import com.github.zavier.table.relation.service.dto.QueryCondition;
 import com.github.zavier.table.relation.service.dto.Result;
 import com.github.zavier.table.relation.service.dto.TableData;
-import com.github.zavier.table.relation.service.query.DataQuery;
+import com.github.zavier.table.relation.service.DataQuery;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.NotNull;
@@ -19,7 +19,7 @@ import javax.sql.DataSource;
 import java.util.*;
 
 @Service
-public class DataQueryService {
+public class DataQueryManager {
 
     @Resource
     private DataQuery dataQuery;

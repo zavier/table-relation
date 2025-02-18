@@ -1,4 +1,4 @@
-package com.github.zavier.table.relation.service;
+package com.github.zavier.table.relation.manager;
 
 import com.github.zavier.table.relation.dao.repository.DataSourceConfigRepository;
 import com.github.zavier.table.relation.service.dto.DataSourceConfig;
@@ -18,16 +18,16 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-public class DataSourceManagerService {
+public class DataSourceManager {
 
-    private static final Logger log = LoggerFactory.getLogger(DataSourceManagerService.class);
+    private static final Logger log = LoggerFactory.getLogger(DataSourceManager.class);
 
     @Resource
     private DataSourceConfigRepository dataSourceConfigRepository;
     @Resource
     private Initializer initializer;
     @Resource
-    private RelationManagerService relationManagerService;
+    private RelationShipManager relationShipManager;
 
     public List<DataSourceConfig> listAllDataSourceConfig() {
         return dataSourceConfigRepository.listAllDataSourceConfig();
@@ -77,7 +77,7 @@ public class DataSourceManagerService {
 
     private void updateTableRelation(String tableSchema) {
         try {
-            relationManagerService.updateColumnUsage(tableSchema);
+            relationShipManager.updateColumnUsage(tableSchema);
         } catch (Exception e) {
             log.error("refreshColumnUsage tableSchema:{} failed", tableSchema, e);
         }

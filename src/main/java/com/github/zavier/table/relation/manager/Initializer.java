@@ -1,10 +1,10 @@
-package com.github.zavier.table.relation.service;
+package com.github.zavier.table.relation.manager;
 
 import com.github.zavier.table.relation.dao.entity.TableRelation;
 import com.github.zavier.table.relation.dao.mapper.TableRelationMapper;
 import com.github.zavier.table.relation.dao.repository.DataSourceConfigRepository;
-import com.github.zavier.table.relation.service.abilty.DataSourceRegistry;
-import com.github.zavier.table.relation.service.abilty.TableRelationRegistry;
+import com.github.zavier.table.relation.service.DataSourceRegistry;
+import com.github.zavier.table.relation.service.TableRelationRegistry;
 import com.github.zavier.table.relation.service.domain.Column;
 import com.github.zavier.table.relation.service.domain.ColumnRelation;
 import com.github.zavier.table.relation.service.dto.DataSourceConfig;

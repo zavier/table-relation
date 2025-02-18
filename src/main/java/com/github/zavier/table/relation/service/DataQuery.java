@@ -1,9 +1,6 @@
-package com.github.zavier.table.relation.service.query;
+package com.github.zavier.table.relation.service;
 
-import com.github.zavier.table.relation.service.abilty.DataSourceRegistry;
 import com.github.zavier.table.relation.service.domain.Column;
-import com.github.zavier.table.relation.service.abilty.SqlExecutor;
-import com.github.zavier.table.relation.service.abilty.TableRelationRegistry;
 import com.github.zavier.table.relation.service.dto.Condition;
 import com.github.zavier.table.relation.service.dto.QueryCondition;
 import jakarta.annotation.Resource;
