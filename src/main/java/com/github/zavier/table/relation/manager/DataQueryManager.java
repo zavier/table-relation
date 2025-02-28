@@ -10,6 +10,7 @@ import com.github.zavier.table.relation.service.dto.QueryCondition;
 import com.github.zavier.table.relation.service.dto.Result;
 import com.github.zavier.table.relation.service.dto.TableData;
 import com.github.zavier.table.relation.service.DataQuery;
+import com.github.zavier.table.relation.utils.SqlBuilder;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.NotNull;
@@ -81,6 +82,27 @@ public class DataQueryManager {
         return Result.success(maps);
     }
 
+
+    public Result<Map<String, List<String>>> generateInsertSql(QueryCondition queryCondition) {
+        checkParam(queryCondition);
+
+        // schema -> table -> list<col, value>
+        final Map<String, Map<String, List<Map<String, Object>>>> schemaTableDataMap = dataQuery.query(queryCondition);
+        if (schemaTableDataMap.isEmpty()) {
+            return Result.success(new HashMap<>());
+        }
+
+        Map<String, List<String>> schemaSqlMap = new HashMap<>();
+
+        schemaTableDataMap.forEach((schema, tableDataMap) -> {
+            tableDataMap.forEach((tableName, dataMapList) -> {
+                final String sql = SqlBuilder.generateInsertSql(tableName, dataMapList);
+                schemaSqlMap.computeIfAbsent(schema, (v) -> new ArrayList<>()).add(sql);
+            });
+        });
+
+        return Result.success(schemaSqlMap);
+    }
 
     public Result<TableData> queryTableData(QueryCondition queryCondition) {
         checkParam(queryCondition);
