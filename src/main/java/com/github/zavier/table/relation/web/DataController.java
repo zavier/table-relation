@@ -57,4 +57,9 @@ public class DataController {
         return dataQueryManager.queryTableData(queryCondition);
     }
 
+    @PostMapping("/generateInsertSql")
+    public Result<Map<String, List<String>>> generateInsertSql(@RequestBody QueryCondition queryCondition) {
+        return dataQueryManager.generateInsertSql(queryCondition);
+    }
+
 }
