@@ -2,6 +2,7 @@ package com.github.zavier.table.relation.service;
 
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +14,8 @@ import java.util.Map;
 public class SqlExecutor {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(SqlExecutor.class);
 
-    private static final int MAX_SQL_LENGTH = 10;
+    @Value("${sql.query.count.max:10}")
+    private Integer maxSqlQueryCount;
 
     public List<Map<String, Object>> sqlQueryWithLimit(DataSource dataSource, String sql, Object... args) {
         String limitSql = wrapLimit2Sql(sql);
@@ -33,7 +35,7 @@ public class SqlExecutor {
     }
 
     private String wrapLimit2Sql(String sql) {
-        return sql + " limit " + MAX_SQL_LENGTH;
+        return sql + " limit " + maxSqlQueryCount;
     }
 
     private JdbcTemplate getJdbcTemplate(DataSource dataSource) {
