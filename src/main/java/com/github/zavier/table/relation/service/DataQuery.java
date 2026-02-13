@@ -131,7 +131,9 @@ public class DataQuery {
         }
 
         final DataSource dataSource = sourceOptional.get();
-        return sqlExecutor.sqlQueryWithLimit(dataSource, queryCondition.buildSql());
+        final QueryCondition.SqlWithParams sqlWithParams = queryCondition.buildSql();
+        return sqlExecutor.sqlQueryWithLimit(dataSource, sqlWithParams.getSql(),
+            sqlWithParams.getParams().toArray());
     }
 
 }
