@@ -75,14 +75,6 @@ public class DataQueryManager {
         return Result.success(mySqlTableMetaInfoQuery.getTableColumnMetaInfo(schema, dataSource));
     }
 
-    public Result<List<Map<String, Object>>> executeSql(String schema, String sql) {
-        Validate.notBlank(schema, "schema can not be blank");
-        Validate.notBlank(sql, "sql can not be blank");
-        final List<Map<String, Object>> maps = dataQuery.queryBySql(schema, sql);
-        return Result.success(maps);
-    }
-
-
     public Result<Map<String, List<String>>> generateInsertSql(QueryCondition queryCondition) {
         checkParam(queryCondition);
 

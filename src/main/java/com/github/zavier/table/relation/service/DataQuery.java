@@ -32,15 +32,6 @@ public class DataQuery {
         return queryByBfs(queryCondition);
     }
 
-    public List<Map<String, Object>> queryBySql(String schema, String sql) {
-        final Optional<DataSource> sourceOptional = dataSourceRegistry.getDataSource(schema);
-        if (sourceOptional.isEmpty()) {
-            throw new RuntimeException("dataSource not found:" + schema);
-        }
-        final DataSource dataSource = sourceOptional.get();
-        return sqlExecutor.sqlQueryWithoutLimit(dataSource, sql);
-    }
-
     private Map<String, Map<String, List<Map<String, Object>>>> queryByBfs(QueryCondition queryCondition) {
         Queue<QueryCondition> queue = new LinkedList<>();
         queue.add(queryCondition);
