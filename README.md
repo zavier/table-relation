@@ -2,17 +2,47 @@
 
 后端基于spring boot自行开发；前端部分使用了Trae，让大模型来进行的开发～
 
- [对应前端项目代码](https://github.com/zavier/table-relation-front)
+前端源码位于本仓库 `frontend/` 目录（Vue 3 + Vite + Element Plus），不再单独维护前端仓库。
 
-服务主要还是本地部署个人使用，为了简化，本地数据库使用了sqlite的文件形式存储，同时采用了将前端项目打包结果复制到后端项目中同步部署，所以没有其他任务外部依赖
+服务主要还是本地部署个人使用，为了简化，本地数据库使用了sqlite的文件形式存储；前端构建产物由 Maven 在打包时自动生成并打入 jar，所以没有其他外部依赖
 
-在后端项目中启动后，直接访问 `http://localhost:8080/` 即可使用，或者打包后通过 `java -jar xxx.jar` 执行
+打包后通过 `java -jar xxx.jar` 执行，直接访问 `http://localhost:8080/` 即可使用
 
 注意：
 
-1. 需要 jdk 版本大于等于 21
+1. 需要 jdk 版本大于等于 21；打包时需要 Node.js 20+（由 frontend-maven-plugin 自动下载，无需手动安装）
 
 2. 没有做鉴权及SQL注入等处理，所以只建议本地安装个人使用
+
+### 本地开发
+
+前端开发（热更新，`/api` 代理到 `localhost:8080`）：
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+后端开发（不构建前端，页面通过上面的前端 dev server 访问）：
+
+```bash
+./mvnw spring-boot:run
+```
+
+一条命令打包（后端 + 前端，产出带 UI 的 jar）：
+
+```bash
+./mvnw clean package
+```
+
+如果只想编译/测试后端、跳过前端构建，可显式关闭 profile：
+
+```bash
+./mvnw package -P '!frontend'
+```
+
+产物为 `target/table-relation-*.jar`。
 
 下面进行一下对应功能介绍
 
@@ -121,3 +151,4 @@ ORDER BY s.from_date;
 - [x] 支持通过自然语言生成SQL(大模型)
 - [ ] 建立字段关系，同步关联更新
 - [ ] 支持分库分表
+- [ ] 前端工程化改造，详见 [docs/frontend-todo.md](docs/frontend-todo.md)
