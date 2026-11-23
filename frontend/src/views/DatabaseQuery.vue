@@ -1,9 +1,11 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
 import VueJsonPretty from 'vue-json-pretty'
 import 'vue-json-pretty/lib/styles.css'
 import { ElMessage } from 'element-plus'
+import { getAllSchemas, getSchemaTables, getTableColumns } from '../api/meta'
+import { generateInsertSql, queryTable } from '../api/query'
+import { ApiError } from '../api/request'
 
 const schemas = ref([])
 const selectedSchema = ref('')
@@ -33,19 +35,13 @@ const toggleRelatedTablesMode = () => {
 // 获取数据库schema列表
 const fetchSchemas = async () => {
   try {
-    const response = await axios.get('/api/table/allSchema')
-    if (response.data.success) {
-      schemas.value = response.data.data.map((schemaName) => ({
-        value: schemaName,
-        label: schemaName
-      }))
-    } else {
-      ElMessage.error(response.data.message)
-      schemas.value = []
-    }
+    const schemaNames = await getAllSchemas()
+    schemas.value = (schemaNames ?? []).map((schemaName) => ({
+      value: schemaName,
+      label: schemaName
+    }))
   } catch (error) {
     console.error('获取schema失败:', error)
-    ElMessage.error('获取schema失败')
     schemas.value = []
   }
 }
@@ -54,26 +50,16 @@ const fetchSchemas = async () => {
 const fetchTables = async () => {
   if (!selectedSchema.value) return
   try {
-    const response = await axios.get(`/api/table/schemaTables`, {
-      params: {
-        schema: selectedSchema.value
-      }
-    })
-    if (response.data.success) {
-      tables.value = response.data.data.map((tableName) => ({
-        value: tableName,
-        label: tableName
-      }))
-    } else {
-      ElMessage.error(response.data.message)
-      tables.value = []
-    }
+    const tableNames = await getSchemaTables(selectedSchema.value)
+    tables.value = (tableNames ?? []).map((tableName) => ({
+      value: tableName,
+      label: tableName
+    }))
     selectedTable.value = ''
     fields.value = []
     queryConditions.value = []
   } catch (error) {
     console.error('获取表失败:', error)
-    ElMessage.error('获取表失败')
     tables.value = []
   }
 }
@@ -82,26 +68,15 @@ const fetchTables = async () => {
 const fetchFields = async () => {
   if (!selectedTable.value) return
   try {
-    const response = await axios.get('/api/table/tableColumns', {
-      params: {
-        schema: selectedSchema.value,
-        tableName: selectedTable.value
-      }
-    })
-    if (response.data.success) {
-      // 将返回的字符串数组转换为对象数组格式，以适配现有的组件结构
-      fields.value = response.data.data.map(fieldName => ({
-        id: fieldName,
-        name: fieldName
-      }))
-    } else {
-      ElMessage.error(response.data.message)
-      fields.value = []
-    }
+    const columnNames = await getTableColumns(selectedSchema.value, selectedTable.value)
+    // 将返回的字符串数组转换为对象数组格式，以适配现有的组件结构
+    fields.value = (columnNames ?? []).map((fieldName) => ({
+      id: fieldName,
+      name: fieldName
+    }))
     queryConditions.value = []
   } catch (error) {
     console.error('获取字段失败:', error)
-    ElMessage.error('获取字段失败')
     fields.value = []
   }
 }
@@ -123,19 +98,16 @@ const removeCondition = (index) => {
 // 复制SQL结果数据
 const copySqlResult = async () => {
   try {
-    const response = await axios.post('/api/table/generateInsertSql', {
+    const insertSql = await generateInsertSql({
       schema: selectedSchema.value,
       table: selectedTable.value,
       conditions: queryConditions.value
     })
-    if (response.data.success) {
-      const jsonStr = JSON.stringify(response.data.data, null, 2)
-      await navigator.clipboard.writeText(jsonStr)
-      ElMessage.success('复制成功')
-    } else {
-      ElMessage.error(response.data.message || '生成SQL失败')
-    }
+    await navigator.clipboard.writeText(JSON.stringify(insertSql, null, 2))
+    ElMessage.success('复制成功')
   } catch (error) {
+    // 接口错误已由拦截器统一提示，这里只处理剪贴板等本地错误
+    if (error instanceof ApiError) return
     console.error('复制失败:', error)
     ElMessage.error('复制失败')
   }
@@ -144,41 +116,36 @@ const copySqlResult = async () => {
 // 执行查询
 const executeQuery = async () => {
   try {
-    const response = await axios.post('/api/table/sqlQuery', {
+    const { tableData, comments } = await queryTable({
       schema: selectedSchema.value,
       table: selectedTable.value,
       conditions: queryConditions.value
     })
-    if (response.data.success) {
-      const { tableData, comments } = response.data.data
-      queryResult.value = tableData
-      // 分离主表数据和关联表数据
-      mainTableData.value = tableData[selectedTable.value] || []
-      mainTableComments.value = comments[selectedTable.value] || {}
-      ElMessage.success('查询成功')
-      
-      // 处理关联表数据和注释
-      relatedTablesData.value = Object.entries(tableData)
-        .filter(([key]) => key !== selectedTable.value)
-        .reduce((acc, [key, value]) => {
-          acc[key] = value
-          return acc
-        }, {})
-      
-      relatedTablesComments.value = Object.entries(comments)
-        .filter(([key]) => key !== selectedTable.value)
-        .reduce((acc, [key, value]) => {
-          acc[key] = value
-          return acc
-        }, {})
-    } else {
-      ElMessage.error(response.data.message)
-      queryResult.value = null
-      mainTableData.value = null
-      relatedTablesData.value = {}
-    }
+    queryResult.value = tableData
+    // 分离主表数据和关联表数据
+    mainTableData.value = tableData[selectedTable.value] || []
+    mainTableComments.value = comments[selectedTable.value] || {}
+    ElMessage.success('查询成功')
+
+    // 处理关联表数据和注释
+    relatedTablesData.value = Object.entries(tableData)
+      .filter(([key]) => key !== selectedTable.value)
+      .reduce((acc, [key, value]) => {
+        acc[key] = value
+        return acc
+      }, {})
+
+    relatedTablesComments.value = Object.entries(comments)
+      .filter(([key]) => key !== selectedTable.value)
+      .reduce((acc, [key, value]) => {
+        acc[key] = value
+        return acc
+      }, {})
   } catch (error) {
     console.error('查询执行失败:', error)
+    queryResult.value = null
+    mainTableData.value = null
+    relatedTablesData.value = {}
   }
 }
 

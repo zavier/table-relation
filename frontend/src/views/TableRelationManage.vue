@@ -1,7 +1,13 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import axios from 'axios'
+import {
+  addRelation,
+  deleteRelation,
+  listRelations,
+  updateRelation
+} from '../api/relation'
+import { getAllSchemas, getSchemaTables, getTableColumns } from '../api/meta'
 
 // 表关系列表
 const relationList = ref([])
@@ -40,17 +46,13 @@ const formData = ref({
 // 获取schema列表
 const fetchSchemas = async () => {
   try {
-    const response = await axios.get('/api/table/allSchema')
-    if (response.data.success) {
-      schemas.value = response.data.data.map((schemaName) => ({
-        value: schemaName,
-        label: schemaName
-      }))
-    } else {
-      ElMessage.error(response.data.message || '获取数据库列表失败')
-    }
+    const schemaNames = await getAllSchemas()
+    schemas.value = (schemaNames ?? []).map((schemaName) => ({
+      value: schemaName,
+      label: schemaName
+    }))
   } catch (error) {
-    ElMessage.error('获取数据库列表失败')
+    console.error('获取数据库列表失败:', error)
   }
 }
 
@@ -58,24 +60,18 @@ const fetchSchemas = async () => {
 const fetchTables = async (schema, isReferenced = false) => {
   if (!schema) return
   try {
-    const response = await axios.get('/api/table/schemaTables', {
-      params: { schema }
-    })
-    if (response.data.success) {
-      const tableList = response.data.data.map((tableName) => ({
-        value: tableName,
-        label: tableName
-      }))
-      if (isReferenced) {
-        referencedTables.value = tableList
-      } else {
-        tables.value = tableList
-      }
+    const tableNames = await getSchemaTables(schema)
+    const tableList = (tableNames ?? []).map((tableName) => ({
+      value: tableName,
+      label: tableName
+    }))
+    if (isReferenced) {
+      referencedTables.value = tableList
     } else {
-      ElMessage.error(response.data.message || '获取表列表失败')
+      tables.value = tableList
     }
   } catch (error) {
-    ElMessage.error('获取表列表失败')
+    console.error('获取表列表失败:', error)
   }
 }
 
@@ -83,27 +79,18 @@ const fetchTables = async (schema, isReferenced = false) => {
 const fetchFields = async (schema, table, isReferenced = false) => {
   if (!schema || !table) return
   try {
-    const response = await axios.get('/api/table/tableColumns', {
-      params: {
-        schema,
-        tableName: table
-      }
-    })
-    if (response.data.success) {
-      const fieldList = response.data.data.map((fieldName) => ({
-        value: fieldName,
-        label: fieldName
-      }))
-      if (isReferenced) {
-        referencedFields.value = fieldList
-      } else {
-        fields.value = fieldList
-      }
+    const columnNames = await getTableColumns(schema, table)
+    const fieldList = (columnNames ?? []).map((fieldName) => ({
+      value: fieldName,
+      label: fieldName
+    }))
+    if (isReferenced) {
+      referencedFields.value = fieldList
     } else {
-      ElMessage.error(response.data.message || '获取字段列表失败')
+      fields.value = fieldList
     }
   } catch (error) {
-    ElMessage.error('获取字段列表失败')
+    console.error('获取字段列表失败:', error)
   }
 }
 
@@ -167,14 +154,9 @@ const currentId = ref(null)
 const fetchRelations = async () => {
   loading.value = true
   try {
-    const response = await axios.get('/api/table/relation/list')
-    if (response.data.success) {
-      relationList.value = response.data.data
-    } else {
-      ElMessage.error(response.data.message || '获取表关系列表失败')
-    }
+    relationList.value = (await listRelations()) ?? []
   } catch (error) {
-    ElMessage.error('获取表关系列表失败')
+    console.error('获取表关系列表失败:', error)
   } finally {
     loading.value = false
   }
@@ -220,26 +202,24 @@ const openDialog = async (row) => {
 // 提交表单
 const handleSubmit = async () => {
   if (!formRef.value) return
-  
+
   try {
     await formRef.value.validate()
-    const url = isEdit.value ? `/api/table/relation/update` : '/api/table/relation/add'
-    const method = 'post'
-    const response = await axios[method](url, formData.value)
-    
-    if (response.data.success) {
-      ElMessage.success(isEdit.value ? '表关系更新成功' : '表关系添加成功')
-      dialogVisible.value = false
-      fetchRelations()
+  } catch {
+    return
+  }
+
+  try {
+    if (isEdit.value) {
+      await updateRelation(formData.value)
     } else {
-      ElMessage.error(response.data.message || (isEdit.value ? '更新失败' : '添加失败'))
+      await addRelation(formData.value)
     }
+    ElMessage.success(isEdit.value ? '表关系更新成功' : '表关系添加成功')
+    dialogVisible.value = false
+    fetchRelations()
   } catch (error) {
-    if (error.response) {
-      ElMessage.error(error.response.data.message || (isEdit.value ? '更新失败' : '添加失败'))
-    } else {
-      ElMessage.error('网络错误，请稍后重试')
-    }
+    console.error('保存表关系失败:', error)
   }
 }
 
@@ -249,18 +229,16 @@ const handleDelete = async (id) => {
     await ElMessageBox.confirm('确定要删除该表关系吗？', '提示', {
       type: 'warning'
     })
-    
-    const response = await axios.post(`/api/table/relation/delete/${id}`)
-    if (response.data.success) {
-      ElMessage.success('删除成功')
-      fetchRelations()
-    } else {
-      ElMessage.error(response.data.message || '删除失败')
-    }
+  } catch {
+    return
+  }
+
+  try {
+    await deleteRelation(id)
+    ElMessage.success('删除成功')
+    fetchRelations()
   } catch (error) {
-    if (error !== 'cancel') {
-      ElMessage.error('删除失败')
-    }
+    console.error('删除表关系失败:', error)
   }
 }
 

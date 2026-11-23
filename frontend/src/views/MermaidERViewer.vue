@@ -1,8 +1,10 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import mermaid from 'mermaid'
+import { getAllSchemas, getSchemaTables } from '../api/meta'
+import { getErDiagram } from '../api/relation'
+import { ApiError } from '../api/request'
 
 // 拖拽相关状态
 const isDragging = ref(false)
@@ -36,19 +38,13 @@ mermaid.initialize({
 // 获取数据库schema列表
 const fetchSchemas = async () => {
   try {
-    const response = await axios.get('/api/table/allSchema')
-    if (response.data.success) {
-      schemas.value = response.data.data.map((schemaName) => ({
-        value: schemaName,
-        label: schemaName
-      }))
-    } else {
-      ElMessage.error(response.data.message)
-      schemas.value = []
-    }
+    const schemaNames = await getAllSchemas()
+    schemas.value = (schemaNames ?? []).map((schemaName) => ({
+      value: schemaName,
+      label: schemaName
+    }))
   } catch (error) {
     console.error('获取schema失败:', error)
-    ElMessage.error('获取schema失败')
     schemas.value = []
   }
 }
@@ -57,25 +53,15 @@ const fetchSchemas = async () => {
 const fetchTables = async () => {
   if (!selectedSchema.value) return
   try {
-    const response = await axios.get(`/api/table/schemaTables`, {
-      params: {
-        schema: selectedSchema.value
-      }
-    })
-    if (response.data.success) {
-      tables.value = response.data.data.map((tableName) => ({
-        value: tableName,
-        label: tableName
-      }))
-    } else {
-      ElMessage.error(response.data.message)
-      tables.value = []
-    }
+    const tableNames = await getSchemaTables(selectedSchema.value)
+    tables.value = (tableNames ?? []).map((tableName) => ({
+      value: tableName,
+      label: tableName
+    }))
     selectedTable.value = ''
     erDiagram.value = ''
   } catch (error) {
     console.error('获取表失败:', error)
-    ElMessage.error('获取表失败')
     tables.value = []
   }
 }
@@ -94,42 +80,38 @@ const generateERDiagram = async () => {
 
   loading.value = true
   try {
-    const response = await axios.get('/api/table/relation/erDiagram', {
-      params: {
-        schema: selectedSchema.value,
-        tableName: selectedTable.value,
-        needTableInfo: needTableInfo.value
-      }
+    erDiagram.value = await getErDiagram({
+      schema: selectedSchema.value,
+      tableName: selectedTable.value,
+      needTableInfo: needTableInfo.value
     })
 
-    if (response.data.success) {
-      erDiagram.value = response.data.data
-      // 清除之前的图表
-      const container = document.querySelector('#mermaid-diagram')
-      if (!container) {
-        throw new Error('找不到图表容器元素')
-      }
-      container.innerHTML = ''
+    // 清除之前的图表
+    const container = document.querySelector('#mermaid-diagram')
+    if (!container) {
+      throw new Error('找不到图表容器元素')
+    }
+    container.innerHTML = ''
 
-      // 创建新的图表容器
-      const mermaidDiv = document.createElement('div')
-      mermaidDiv.className = 'mermaid'
-      mermaidDiv.textContent = erDiagram.value
-      container.appendChild(mermaidDiv)
+    // 创建新的图表容器
+    const mermaidDiv = document.createElement('div')
+    mermaidDiv.className = 'mermaid'
+    mermaidDiv.textContent = erDiagram.value
+    container.appendChild(mermaidDiv)
 
-      // 使用 try-catch 包裹渲染过程
-      try {
-        await mermaid.run()
-      } catch (renderError) {
-        console.error('Mermaid渲染错误:', renderError)
-        throw new Error('图表渲染失败')
-      }
-    } else {
-      ElMessage.error(response.data.message || '生成ER图失败')
+    // 使用 try-catch 包裹渲染过程
+    try {
+      await mermaid.run()
+    } catch (renderError) {
+      console.error('Mermaid渲染错误:', renderError)
+      throw new Error('图表渲染失败')
     }
   } catch (error) {
     console.error('生成ER图失败:', error)
-    ElMessage.error(error.message || '生成ER图失败')
+    // 接口错误已由拦截器统一提示，这里只提示本地渲染错误
+    if (!(error instanceof ApiError)) {
+      ElMessage.error(error.message || '生成ER图失败')
+    }
   } finally {
     loading.value = false
   }
