@@ -1,4 +1,7 @@
-# 数据库查询工具
+# 数据库查询工具（前端）
+
+> 本目录已并入 [table-relation](https://github.com/zavier/table-relation) 仓库，位于 `frontend/`，不再单独维护。
+> 日常开发只需在本目录执行 `npm install && npm run dev`；打包由仓库根目录的 `mvn package` 自动完成，无需手动复制构建产物。
 
 ## 项目背景
 
@@ -46,13 +49,13 @@
 ## 使用说明
 
 ### 环境要求
-- Node.js 16+
+- Node.js 20+
 - npm 7+
 
 ### 安装步骤
-1. 克隆项目代码
+1. 进入前端目录（位于后端仓库内，无需单独克隆）
 ```bash
-git clone [项目地址]
+cd frontend
 ```
 
 2. 安装依赖
@@ -65,10 +68,12 @@ npm install
 npm run dev
 ```
 
-4. 构建生产版本
+4. 构建生产版本（一般不需要手动执行，在仓库根目录打包即可）
 ```bash
 npm run build
 ```
+
+构建产物默认输出到 `../target/classes/static`，由 Maven 打入 jar。
 
 ### 配置说明
 

@@ -31,3 +31,13 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Frontend ###
+# 前端源码位于 frontend/，构建产物由 Maven 生成，不入库
+/src/main/resources/static/
+/frontend/dist/
+/frontend/node_modules/
+
+### Runtime ###
+/table_database.db
+/logs/
