@@ -4,15 +4,17 @@
 
 优先级从高到低：
 
-## P0：接口层收敛
+## P0：接口层收敛（已完成）
 
-- [ ] 抽取 `frontend/src/api/`，统一 axios 实例（baseURL、超时、错误提示）
-- [ ] 把 6 个页面里散落的 `axios.get/post('/api/...')` 收敛为按领域划分的 API 函数
+- [x] 抽取 `frontend/src/api/`，统一 axios 实例（baseURL、超时、错误提示）
+- [x] 把 6 个页面里散落的 `axios.get/post('/api/...')` 收敛为按领域划分的 API 函数
+  - `request.js`：axios 实例、`Result` 解包、`ApiError`
+  - `meta.js`（allSchema/schemaTables/tableColumns）
   - `dataSource.js`（list/add/update/delete/test）
-  - `query.js`（allSchema/schemaTables/tableColumns/sqlQuery/generateInsertSql）
+  - `query.js`（sqlQuery/generateInsertSql）
   - `relation.js`（list/add/update/delete/erDiagram）
   - `ai.js`（generateSql/executeSql）
-- [ ] 后端返回结构（`Result`）统一处理，页面只关心 data 与错误分支
+- [x] 后端返回结构（`Result`）统一处理，页面只关心 data 与错误分支
 
 验收：页面中不再直接出现 `/api` 字符串。
 
@@ -52,3 +54,4 @@
 - [x] `mvn package` 一条命令产出带 UI 的 jar（`frontend` profile，默认启用）
 - [x] 前端构建输出到 `target/classes/static`，并加入 `.gitignore`
 - [x] CI 构建前后端并上传 jar 产物
+- [x] P0：API 层收敛（见上）

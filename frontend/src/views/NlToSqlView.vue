@@ -111,8 +111,9 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
 import { ElMessage } from 'element-plus'
+import { getAllSchemas } from '../api/meta'
+import { executeSql as requestExecuteSql, generateSql as requestGenerateSql } from '../api/ai'
 
 const selectedSchema = ref('')
 const demand = ref('')
@@ -127,18 +128,13 @@ const schemas = ref([])
 // 获取数据库schema列表
 const fetchSchemas = async () => {
   try {
-    const response = await axios.get('/api/table/allSchema')
-    if (response.data.success) {
-      schemas.value = response.data.data.map((schemaName) => ({
-        value: schemaName,
-        label: schemaName
-      }))
-    } else {
-      ElMessage.error(response.data.message)
-    }
+    const schemaNames = await getAllSchemas()
+    schemas.value = (schemaNames ?? []).map((schemaName) => ({
+      value: schemaName,
+      label: schemaName
+    }))
   } catch (error) {
     console.error('获取schema失败:', error)
-    ElMessage.error('获取schema失败')
   }
 }
 
@@ -147,22 +143,15 @@ const generateSql = async () => {
   sqlResult.value = '' // 清空之前的结果
   queryResult.value = [] // 清空查询结果
   tableColumns.value = [] // 清空表格列
-  
-  try {
-    const response = await axios.get('/api/table/generateSql', {
-      params: {
-        schema: selectedSchema.value,
-        demand: demand.value
-      }
-    })
 
-    if (response.data.success) {
-      sqlResult.value = response.data.data
-    } else {
-      ElMessage.error(response.data.message || '生成 SQL 失败')
-    }
+  try {
+    sqlResult.value = await requestGenerateSql({
+      schema: selectedSchema.value,
+      demand: demand.value
+    })
   } catch (error) {
-    ElMessage.error('生成 SQL 失败：' + (error.response?.data?.message || error.message))
+    // 接口错误已由拦截器统一提示
+    console.error('生成 SQL 失败:', error)
   } finally {
     loading.value = false
   }
@@ -171,25 +160,20 @@ const generateSql = async () => {
 const executeSql = async () => {
   executing.value = true
   try {
-    const response = await axios.post('/api/table/executeSql', {
+    const data = await requestExecuteSql({
       schema: selectedSchema.value,
       sql: sqlResult.value
     })
-
-    if (response.data.success) {
-      const data = response.data.data
-      if (data.length) {
-        // 从第一条数据获取列名
-        tableColumns.value = Object.keys(data[0])
-        queryResult.value = data
-      } else {
-        ElMessage.info('查询结果为空')
-      }
+    if (data?.length) {
+      // 从第一条数据获取列名
+      tableColumns.value = Object.keys(data[0])
+      queryResult.value = data
     } else {
-      ElMessage.error(response.data.message || '执行 SQL 失败')
+      ElMessage.info('查询结果为空')
     }
   } catch (error) {
-    ElMessage.error('执行 SQL 失败：' + (error.response?.data?.message || error.message))
+    // 接口错误已由拦截器统一提示
+    console.error('执行 SQL 失败:', error)
   } finally {
     executing.value = false
   }

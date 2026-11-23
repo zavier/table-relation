@@ -1,7 +1,13 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import axios from 'axios'
+import {
+  addDataSource,
+  deleteDataSource,
+  listDataSources,
+  testDataSource,
+  updateDataSource
+} from '../api/dataSource'
 
 // 数据源列表
 const dataSourceList = ref([])
@@ -36,14 +42,9 @@ const currentId = ref(null)
 const fetchDataSources = async () => {
   loading.value = true
   try {
-    const response = await axios.get('/api/table/datasource/list')
-    if (response.data.success) {
-      dataSourceList.value = response.data.data
-    } else {
-      ElMessage.error(response.data.message || '获取数据源列表失败')
-    }
+    dataSourceList.value = (await listDataSources()) ?? []
   } catch (error) {
-    ElMessage.error('获取数据源列表失败')
+    console.error('获取数据源列表失败:', error)
   } finally {
     loading.value = false
   }
@@ -73,26 +74,24 @@ const openDialog = (row) => {
 // 提交表单
 const handleSubmit = async () => {
   if (!formRef.value) return
-  
+
   try {
     await formRef.value.validate()
-    const url = isEdit.value ? `/api/table/datasource/update` : '/api/table/datasource/add'
-    const method = 'post'
-    const response = await axios[method](url, formData.value)
-    
-    if (response.data.success) {
-      ElMessage.success(isEdit.value ? '数据源更新成功' : '数据源添加成功')
-      dialogVisible.value = false
-      fetchDataSources()
+  } catch {
+    return
+  }
+
+  try {
+    if (isEdit.value) {
+      await updateDataSource(formData.value)
     } else {
-      ElMessage.error(response.data.message || (isEdit.value ? '更新失败' : '添加失败'))
+      await addDataSource(formData.value)
     }
+    ElMessage.success(isEdit.value ? '数据源更新成功' : '数据源添加成功')
+    dialogVisible.value = false
+    fetchDataSources()
   } catch (error) {
-    if (error.response) {
-      ElMessage.error(error.response.data.message || (isEdit.value ? '更新失败' : '添加失败'))
-    } else {
-      ElMessage.error('网络错误，请稍后重试')
-    }
+    console.error('保存数据源失败:', error)
   }
 }
 
@@ -102,32 +101,30 @@ const handleDelete = async (id) => {
     await ElMessageBox.confirm('确定要删除该数据源吗？', '提示', {
       type: 'warning'
     })
-    
-    const response = await axios.post(`/api/table/datasource/delete/${id}`)
-    if (response.data.success) {
-      ElMessage.success('删除成功')
-      fetchDataSources()
-    } else {
-      ElMessage.error(response.data.message || '删除失败')
-    }
+  } catch {
+    return
+  }
+
+  try {
+    await deleteDataSource(id)
+    ElMessage.success('删除成功')
+    fetchDataSources()
   } catch (error) {
-    if (error !== 'cancel') {
-      ElMessage.error('删除失败')
-    }
+    console.error('删除数据源失败:', error)
   }
 }
 
 // 测试连接
 const testConnection = async (row) => {
   try {
-    const response = await axios.post('/api/table/datasource/test', row)
-    if (response.data.success && response.data.data) {
+    const connected = await testDataSource(row)
+    if (connected) {
       ElMessage.success('连接测试成功')
     } else {
-      ElMessage.error(response.data.message || '连接测试失败')
+      ElMessage.error('连接测试失败')
     }
   } catch (error) {
-    ElMessage.error('连接测试失败')
+    console.error('连接测试失败:', error)
   }
 }
 
