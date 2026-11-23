@@ -1,18 +1,7 @@
-<script setup>
-import { useRouter } from 'vue-router'
-
-const router = useRouter()
-</script>
-
 <template>
   <el-container class="app-container">
     <el-aside width="200px" class="aside">
-      <el-menu
-        mode="vertical"
-        class="menu"
-        :default-active="$route.path"
-        router
-      >
+      <el-menu mode="vertical" class="menu" :default-active="$route.path" router>
         <el-menu-item index="/database-query">
           <el-icon><Search /></el-icon>
           <span>数据库查询</span>
@@ -31,7 +20,7 @@ const router = useRouter()
         </el-menu-item>
       </el-menu>
     </el-aside>
-    
+
     <el-main class="main">
       <router-view />
     </el-main>
@@ -66,7 +55,7 @@ body {
 }
 
 :deep(.el-menu-item.is-active) {
-  color: #409EFF;
+  color: #409eff;
   background-color: #263445;
 }
 

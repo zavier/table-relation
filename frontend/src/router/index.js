@@ -27,9 +27,9 @@ const router = createRouter({
       component: TableRelationManage
     },
     {
-        path: '/er-diagram',
-        name: 'ERDiagram',
-        component: MermaidERViewer
+      path: '/er-diagram',
+      name: 'ERDiagram',
+      component: MermaidERViewer
     },
     {
       // 兼容旧书签（如已下线的 JSON 格式化、SQL 生成页面）

@@ -24,6 +24,15 @@ npm install
 npm run dev
 ```
 
+前端代码检查：
+
+```bash
+npm run lint          # ESLint
+npm run format        # Prettier 自动格式化
+npm run format:check  # 仅检查格式（CI 使用）
+npm run test          # Vitest 单元测试
+```
+
 后端开发（不构建前端，页面通过上面的前端 dev server 访问）：
 
 ```bash

@@ -139,14 +139,9 @@ onMounted(() => {
       <h2>数据源管理</h2>
       <el-button type="primary" @click="openDialog()">添加数据源</el-button>
     </div>
-    
+
     <!-- 数据源列表 -->
-    <el-table
-      :data="dataSourceList"
-      v-loading="loading"
-      style="width: 100%"
-      border
-    >
+    <el-table :data="dataSourceList" v-loading="loading" style="width: 100%" border>
       <el-table-column prop="host" label="主机地址" />
       <el-table-column prop="username" label="用户名" />
       <el-table-column prop="database" label="数据库名" />
@@ -154,26 +149,16 @@ onMounted(() => {
       <el-table-column label="操作" width="250" fixed="right">
         <template #default="{ row }">
           <el-button-group>
-            <el-button type="primary" @click="testConnection(row)" link>
-              测试连接
-            </el-button>
-            <el-button type="primary" @click="openDialog(row)" link>
-              编辑
-            </el-button>
-            <el-button type="danger" @click="handleDelete(row.id)" link>
-              删除
-            </el-button>
+            <el-button type="primary" @click="testConnection(row)" link> 测试连接 </el-button>
+            <el-button type="primary" @click="openDialog(row)" link> 编辑 </el-button>
+            <el-button type="danger" @click="handleDelete(row.id)" link> 删除 </el-button>
           </el-button-group>
         </template>
       </el-table-column>
     </el-table>
 
     <!-- 添加/编辑数据源对话框 -->
-    <el-dialog
-      :title="isEdit ? '编辑数据源' : '添加数据源'"
-      v-model="dialogVisible"
-      width="500px"
-    >
+    <el-dialog :title="isEdit ? '编辑数据源' : '添加数据源'" v-model="dialogVisible" width="500px">
       <el-form
         ref="formRef"
         :model="formData"
@@ -184,11 +169,11 @@ onMounted(() => {
         <el-form-item label="主机地址" prop="host">
           <el-input v-model="formData.host" placeholder="请输入主机地址" />
         </el-form-item>
-        
+
         <el-form-item label="用户名" prop="username">
           <el-input v-model="formData.username" placeholder="请输入用户名" />
         </el-form-item>
-        
+
         <el-form-item label="密码" prop="password">
           <el-input
             v-model="formData.password"
@@ -197,11 +182,11 @@ onMounted(() => {
             show-password
           />
         </el-form-item>
-        
+
         <el-form-item label="数据库名" prop="database">
           <el-input v-model="formData.database" placeholder="请输入数据库名" />
         </el-form-item>
-        
+
         <el-form-item label="端口号" prop="port">
           <el-input v-model="formData.port" placeholder="请输入端口号" />
         </el-form-item>

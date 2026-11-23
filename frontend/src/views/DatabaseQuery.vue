@@ -21,7 +21,6 @@ const relatedTablesDisplayMode = ref('table') // 关联表展示模式：'json' 
 const mainTableComments = ref({}) // 主表字段注释
 const relatedTablesComments = ref({}) // 关联表字段注释
 
-
 // 切换主表展示模式
 const toggleMainTableMode = () => {
   mainTableDisplayMode.value = mainTableDisplayMode.value === 'json' ? 'table' : 'json'
@@ -174,7 +173,7 @@ onMounted(() => {
 <template>
   <div class="database-query">
     <h2>数据库查询工具</h2>
-    
+
     <!-- Schema选择 -->
     <el-select
       v-model="selectedSchema"
@@ -210,9 +209,13 @@ onMounted(() => {
 
     <!-- 查询条件 -->
     <div class="query-conditions" v-if="selectedTable">
-      
       <div v-for="(condition, index) in queryConditions" :key="index" class="condition-row">
-        <el-select v-model="condition.field" placeholder="选择字段" class="condition-field" filterable>
+        <el-select
+          v-model="condition.field"
+          placeholder="选择字段"
+          class="condition-field"
+          filterable
+        >
           <el-option
             v-for="field in fields"
             :key="field.id"
@@ -220,7 +223,7 @@ onMounted(() => {
             :value="field.id"
           />
         </el-select>
-        
+
         <el-select v-model="condition.operator" class="condition-operator">
           <el-option label="等于" value="=" />
           <el-option label="不等于" value="!=" />
@@ -228,9 +231,9 @@ onMounted(() => {
           <el-option label="小于" value="<" />
           <el-option label="LIKE" value="LIKE" />
         </el-select>
-        
+
         <el-input v-model="condition.value" placeholder="输入值" class="condition-value" />
-        
+
         <el-button type="danger" @click="removeCondition(index)">删除</el-button>
       </div>
 
@@ -249,7 +252,7 @@ onMounted(() => {
       <div class="result-header">
         <h3>查询结果</h3>
       </div>
-      
+
       <!-- 主表数据 -->
       <div class="main-table-section">
         <div class="section-header">
