@@ -13,7 +13,6 @@
   - `dataSource.js`（list/add/update/delete/test）
   - `query.js`（sqlQuery/generateInsertSql）
   - `relation.js`（list/add/update/delete/erDiagram）
-  - `ai.js`（generateSql/executeSql）
 - [x] 后端返回结构（`Result`）统一处理，页面只关心 data 与错误分支
 
 验收：页面中不再直接出现 `/api` 字符串。
@@ -30,7 +29,7 @@
 ## P1：测试
 
 - [ ] 引入 Vitest + @vue/test-utils
-- [ ] 覆盖核心逻辑：查询条件构造、关系表单校验、JSON 格式化、SQL 结果渲染
+- [ ] 覆盖核心逻辑：查询条件构造、关系表单校验、SQL 结果渲染
 - [ ] `npm run test` 接入 CI
 
 验收：核心模块有单测，CI 执行通过。

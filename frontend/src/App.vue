@@ -29,14 +29,6 @@ const router = useRouter()
           <el-icon><Share /></el-icon>
           <span>ER图展示</span>
         </el-menu-item>
-        <el-menu-item index="/json-formatter">
-          <el-icon><Document /></el-icon>
-          <span>JSON格式化</span>
-        </el-menu-item>
-        <el-menu-item index="/nl-to-sql">
-          <el-icon><Document /></el-icon>
-          <span>SQL生成</span>
-        </el-menu-item>
       </el-menu>
     </el-aside>
     
