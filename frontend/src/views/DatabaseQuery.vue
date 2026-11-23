@@ -402,7 +402,7 @@ onMounted(() => {
 
 .result-card {
   margin-top: 10px;
-  background-color: #f8f9fa;
+  background-color: var(--el-fill-color-light);
 }
 
 .result-card .json-viewer {
@@ -415,11 +415,11 @@ onMounted(() => {
 }
 
 .vjs-tree .vjs-value {
-  color: #409EFF !important;
+  color: var(--el-color-primary) !important;
 }
 
 .vjs-tree .vjs-key {
-  color: #67C23A !important;
+  color: var(--el-color-success) !important;
 }
 
 .main-table-section {
@@ -429,7 +429,7 @@ onMounted(() => {
 .main-table-section h4,
 .related-tables-section h4 {
   margin-bottom: 10px;
-  color: #606266;
+  color: var(--el-text-color-regular);
 }
 
 .related-tables-section .el-collapse {
@@ -438,7 +438,7 @@ onMounted(() => {
 
 .related-tables-section .el-collapse-item__header {
   font-size: 16px;
-  color: #409EFF;
+  color: var(--el-color-primary);
 }
 
 .related-tables-section .el-collapse-item__content {

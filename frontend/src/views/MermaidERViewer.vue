@@ -23,10 +23,11 @@ const scale = ref(1.2) // 添加缩放比例状态
 const MIN_SCALE = 0.4 // 添加最小缩放限制
 const needTableInfo = ref(true) // 添加表信息显示选项
 
-// 初始化mermaid
+// 初始化mermaid（跟随系统深浅色主题）
+const isDarkMode = document.documentElement.classList.contains('dark')
 mermaid.initialize({
   startOnLoad: false,  // 修改为false，手动控制渲染时机
-  theme: 'default',
+  theme: isDarkMode ? 'dark' : 'default',
   securityLevel: 'loose',
   fontSize: 16,
   flowchart: {
@@ -291,9 +292,9 @@ onMounted(() => {
 .diagram-container {
   margin-top: 20px;
   padding: 20px;
-  background-color: white;
+  background-color: var(--el-bg-color);
   border-radius: 8px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: var(--el-box-shadow-light);
   overflow: hidden;
 }
 
