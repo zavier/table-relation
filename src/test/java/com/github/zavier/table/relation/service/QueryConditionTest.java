@@ -85,16 +85,22 @@ class QueryConditionTest {
     }
 
     @Test
-    void buildSqlAppendsCustomizeAndLogicDeleteConditions() {
+    void withAdditionalConditionKeepsOriginalUntouched() {
         QueryCondition queryCondition = buildCondition("emp_no", "=", "110022");
-        queryCondition.addCustomizeConditionSql("deleted = 0");
         queryCondition.setLogicNoDeleteCondition("status <> 'DELETED'");
 
-        SqlWithParams sqlWithParams = queryCondition.buildSql(mysqlAdapter, "employees");
+        QueryCondition restricted = queryCondition.withAdditionalCondition(
+                condition("status", "=", "PAID"));
 
+        SqlWithParams originalSql = queryCondition.buildSql(mysqlAdapter, "employees");
         assertEquals("select * from `employees`.`dept_manager` where `emp_no` = ?"
-                + " and deleted = 0 and status <> 'DELETED'", sqlWithParams.sql());
-        assertEquals(List.of("110022"), sqlWithParams.params());
+                + " and status <> 'DELETED'", originalSql.sql());
+        assertEquals(List.of("110022"), originalSql.params());
+
+        SqlWithParams restrictedSql = restricted.buildSql(mysqlAdapter, "employees");
+        assertEquals("select * from `employees`.`dept_manager` where `emp_no` = ? and `status` = ?"
+                + " and status <> 'DELETED'", restrictedSql.sql());
+        assertEquals(List.of("110022", "PAID"), restrictedSql.params());
     }
 
     @Test
@@ -109,12 +115,15 @@ class QueryConditionTest {
         QueryCondition queryCondition = new QueryCondition();
         queryCondition.setSchema("employees");
         queryCondition.setTable("dept_manager");
+        queryCondition.setConditions(List.of(condition(field, operator, value)));
+        return queryCondition;
+    }
 
+    private Condition condition(String field, String operator, Object value) {
         final Condition condition = new Condition();
         condition.setField(field);
         condition.setOperator(operator);
         condition.setValue(value);
-        queryCondition.setConditions(List.of(condition));
-        return queryCondition;
+        return condition;
     }
 }

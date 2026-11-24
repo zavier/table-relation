@@ -51,7 +51,9 @@ const relation = {
   referencedTableName: 'departments',
   referencedColumnName: 'id',
   relationType: 1,
-  condition: ''
+  conditionField: 'status',
+  conditionOperator: '=',
+  conditionValue: 'PAID'
 }
 
 const mountView = () =>
@@ -150,6 +152,40 @@ describe('TableRelationManage', () => {
     expect(updateRelation).toHaveBeenCalledWith(relation)
     expect(addRelation).not.toHaveBeenCalled()
     expect(ElMessage.success).toHaveBeenCalledWith('表关系更新成功')
+  })
+
+  it('没有关联条件时提交空条件', async () => {
+    const wrapper = mountView()
+    await flushPromises()
+
+    wrapper.vm.formRef = { validate: vi.fn().mockResolvedValue(true) }
+    wrapper.vm.formData = {
+      ...relation,
+      conditionField: '',
+      conditionOperator: '=',
+      conditionValue: ''
+    }
+    await wrapper.vm.handleSubmit()
+
+    expect(addRelation).toHaveBeenCalledWith(
+      expect.objectContaining({
+        conditionField: '',
+        conditionOperator: '',
+        conditionValue: ''
+      })
+    )
+  })
+
+  it('关联条件不完整时提示且不提交', async () => {
+    const wrapper = mountView()
+    await flushPromises()
+
+    wrapper.vm.formRef = { validate: vi.fn().mockResolvedValue(true) }
+    wrapper.vm.formData = { ...relation, conditionValue: '' }
+    await wrapper.vm.handleSubmit()
+
+    expect(addRelation).not.toHaveBeenCalled()
+    expect(ElMessage.error).toHaveBeenCalledWith('请完整填写关联条件的字段、运算符和值')
   })
 
   it('确认后删除表关系并刷新列表', async () => {

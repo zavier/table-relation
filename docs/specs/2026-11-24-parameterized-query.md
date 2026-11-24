@@ -29,7 +29,7 @@ sql.append(column).append(" ").append(operator).append(" ").append(convertSqlVal
 
 | 项目 | 说明 |
 |---|---|
-| 表关系上的「关联条件」 | 用户显式维护的 SQL 片段（如 `type=1`），原样拼接，属于可信配置；后续可做成结构化条件编辑器 |
+| 表关系上的「关联条件」 | 本次未处理；后续已改为结构化条件，见 `2026-11-24-structured-relation-condition.md` |
 | `logic.no.delete.condition` | `application.properties` 配置的 SQL 片段，属于部署方可信输入 |
 | INSERT SQL 导出 | 输出的是给人复制的 SQL 文本，不是执行语句，仍用方言字面量 |
 
@@ -104,6 +104,6 @@ BFS 关联查询本来就是构造 `IN (值列表)`，现在自动变成多占�
 
 ## 6. 后续
 
-1. 表关系「关联条件」改为结构化（字段 + 运算符 + 值），彻底去掉原始 SQL 片段输入
+1. ~~表关系「关联条件」改为结构化（字段 + 运算符 + 值），彻底去掉原始 SQL 片段输入~~ 已完成，见 `2026-11-24-structured-relation-condition.md`
 2. 条件值类型按列元数据转换（当前交给 JDBC 驱动隐式转换）
 3. 与多 schema 演进一起，补充 Testcontainers 下的参数化回归测试

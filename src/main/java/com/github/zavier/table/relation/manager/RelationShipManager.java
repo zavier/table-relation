@@ -5,6 +5,7 @@ import com.github.zavier.table.relation.manager.ai.TableRelationAnalyzer;
 import com.github.zavier.table.relation.service.DataSourceRegistry;
 import com.github.zavier.table.relation.service.constant.RelationType;
 import com.github.zavier.table.relation.service.db.DataSourceContext;
+import com.github.zavier.table.relation.service.db.SqlOperators;
 import com.github.zavier.table.relation.service.TableRelationRegistry;
 import com.github.zavier.table.relation.service.domain.ColumnInfo;
 import com.github.zavier.table.relation.service.dto.ColumnUsage;
@@ -52,15 +53,7 @@ public class RelationShipManager {
         // 是否已存在
         final List<ColumnUsage> columnUsages = listAllColumnUsage();
         if (!columnUsages.isEmpty()) {
-            final boolean exist = columnUsages.stream()
-                    .anyMatch(it -> Objects.equals(it.getTableSchema(), columnUsage.getTableSchema())
-                            && Objects.equals(it.getTableName(), columnUsage.getTableName())
-                            && Objects.equals(it.getColumnName(), columnUsage.getColumnName())
-                            && Objects.equals(it.getCondition(), columnUsage.getCondition())
-                            && Objects.equals(it.getReferencedTableSchema(), columnUsage.getReferencedTableSchema())
-                            && Objects.equals(it.getReferencedTableName(), columnUsage.getReferencedTableName())
-                            && Objects.equals(it.getReferencedColumnName(), columnUsage.getReferencedColumnName())
-                    );
+            final boolean exist = columnUsages.stream().anyMatch(it -> isSameUsage(it, columnUsage));
             Validate.isTrue(!exist, "table relation already exists");
         }
 
@@ -77,14 +70,7 @@ public class RelationShipManager {
                 try {
                     checkParam(columnUsage);
                     final boolean exist = existAllColumnUsageList.stream()
-                            .anyMatch(it -> Objects.equals(it.getTableSchema(), columnUsage.getTableSchema())
-                                    && Objects.equals(it.getTableName(), columnUsage.getTableName())
-                                    && Objects.equals(it.getColumnName(), columnUsage.getColumnName())
-                                    && Objects.equals(it.getCondition(), columnUsage.getCondition())
-                                    && Objects.equals(it.getReferencedTableSchema(), columnUsage.getReferencedTableSchema())
-                                    && Objects.equals(it.getReferencedTableName(), columnUsage.getReferencedTableName())
-                                    && Objects.equals(it.getReferencedColumnName(), columnUsage.getReferencedColumnName())
-                            );
+                            .anyMatch(it -> isSameUsage(it, columnUsage));
                     if (exist) {
                         log.warn("table relation already exists, skip it : {}", columnUsage);
                         continue;
@@ -155,7 +141,9 @@ public class RelationShipManager {
             // 数据预处理一下
             columnUsages.forEach(it -> {
                 it.setId(null);
-                it.setCondition("");
+                it.setConditionField(null);
+                it.setConditionOperator(null);
+                it.setConditionValue(null);
                 it.setTableSchema(schema);
                 it.setReferencedTableSchema(schema);
                 // default
@@ -270,17 +258,19 @@ public class RelationShipManager {
         if (columnUsages.isEmpty()) {
             return false;
         }
-        return columnUsages.stream()
-                .anyMatch(usage -> {
-                    boolean equals = Objects.equals(usage.getTableSchema(), columnUsage.getTableSchema())
-                            && Objects.equals(usage.getTableName(), columnUsage.getTableName())
-                            && Objects.equals(usage.getColumnName(), columnUsage.getColumnName())
-                            && Objects.equals(usage.getCondition(), columnUsage.getCondition())
-                            && Objects.equals(usage.getReferencedTableSchema(), columnUsage.getReferencedTableSchema())
-                            && Objects.equals(usage.getReferencedTableName(), columnUsage.getReferencedTableName())
-                            && Objects.equals(usage.getReferencedColumnName(), columnUsage.getReferencedColumnName());
-                    return equals;
-                });
+        return columnUsages.stream().anyMatch(usage -> isSameUsage(usage, columnUsage));
+    }
+
+    private static boolean isSameUsage(ColumnUsage left, ColumnUsage right) {
+        return Objects.equals(left.getTableSchema(), right.getTableSchema())
+                && Objects.equals(left.getTableName(), right.getTableName())
+                && Objects.equals(left.getColumnName(), right.getColumnName())
+                && Objects.equals(left.getConditionField(), right.getConditionField())
+                && Objects.equals(left.getConditionOperator(), right.getConditionOperator())
+                && Objects.equals(left.getConditionValue(), right.getConditionValue())
+                && Objects.equals(left.getReferencedTableSchema(), right.getReferencedTableSchema())
+                && Objects.equals(left.getReferencedTableName(), right.getReferencedTableName())
+                && Objects.equals(left.getReferencedColumnName(), right.getReferencedColumnName());
     }
 
     private void checkParam(ColumnUsage columnUsage) {
@@ -288,11 +278,33 @@ public class RelationShipManager {
         Validate.notBlank(columnUsage.getTableSchema(), "tableSchema can not be null");
         Validate.notBlank(columnUsage.getTableName(), "tableName can not be null");
         Validate.notBlank(columnUsage.getColumnName(), "columnName can not be null");
-        Validate.notNull(columnUsage.getCondition(), "condition can not be null");
         Validate.notBlank(columnUsage.getReferencedTableSchema(), "referencedTableSchema can not be null");
         Validate.notBlank(columnUsage.getReferencedTableName(), "referencedTableName can not be null");
         Validate.notBlank(columnUsage.getReferencedColumnName(), "referencedColumnName can not be null");
         Validate.notNull(columnUsage.getRelationType(), "relationType can not be null");
+        validateCondition(columnUsage);
+    }
+
+    /**
+     * 条件要么完全不填，要么字段 / 运算符 / 值同时填写；运算符限制在与单值比较的白名单内。
+     */
+    private void validateCondition(ColumnUsage columnUsage) {
+        String field = columnUsage.getConditionField();
+        String operator = columnUsage.getConditionOperator();
+        String value = columnUsage.getConditionValue();
+
+        boolean hasAny = !StringUtils.isAllBlank(field, operator, value);
+        if (!hasAny) {
+            columnUsage.setConditionField(null);
+            columnUsage.setConditionOperator(null);
+            columnUsage.setConditionValue(null);
+            return;
+        }
+        Validate.isTrue(StringUtils.isNoneBlank(field, operator, value),
+                "condition field, operator and value must be filled together");
+        Validate.isTrue(SqlOperators.isComparisonSupported(operator),
+                "Unsupported condition operator: " + operator);
+        columnUsage.setConditionOperator(SqlOperators.normalize(operator));
     }
 
 }

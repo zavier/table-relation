@@ -303,7 +303,6 @@ public class PostgresDatabaseAdapter extends BaseDatabaseAdapter {
         columnUsage.setTableSchema(schema);
         columnUsage.setTableName(Objects.toString(row.get("table_name"), ""));
         columnUsage.setColumnName(Objects.toString(row.get("column_name"), ""));
-        columnUsage.setCondition("");
         columnUsage.setReferencedTableSchema(schema);
         columnUsage.setReferencedTableName(Objects.toString(row.get("referenced_table_name"), ""));
         columnUsage.setReferencedColumnName(Objects.toString(row.get("referenced_column_name"), ""));
