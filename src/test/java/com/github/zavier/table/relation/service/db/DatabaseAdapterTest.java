@@ -18,7 +18,7 @@ class DatabaseAdapterTest {
     void buildJdbcUrl() {
         assertEquals("jdbc:mysql://127.0.0.1:3306/demo?allowPublicKeyRetrieval=true&characterEncoding=utf-8&useSSL=false",
                 mysql.buildJdbcUrl(config(DatabaseType.MYSQL, "demo", null)));
-        assertEquals("jdbc:postgresql://127.0.0.1:5432/demo?ApplicationName=table-relation",
+        assertEquals("jdbc:postgresql://127.0.0.1:5432/demo?ApplicationName=table-relation&stringtype=unspecified",
                 postgres.buildJdbcUrl(config(DatabaseType.POSTGRESQL, "demo", null)));
     }
 

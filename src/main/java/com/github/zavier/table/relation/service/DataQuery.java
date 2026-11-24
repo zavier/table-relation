@@ -4,6 +4,7 @@ import com.github.zavier.table.relation.service.db.DataSourceContext;
 import com.github.zavier.table.relation.service.domain.Column;
 import com.github.zavier.table.relation.service.dto.Condition;
 import com.github.zavier.table.relation.service.dto.QueryCondition;
+import com.github.zavier.table.relation.service.dto.SqlWithParams;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -119,8 +120,10 @@ public class DataQuery {
             queryCondition.setLogicNoDeleteCondition(logicNoDeleteCondition);
         }
 
-        final String sql = queryCondition.buildSql(context.adapter(), context.physicalSchema());
-        return sqlExecutor.sqlQueryWithLimit(context.dataSource(), sql).stream()
+        final SqlWithParams sqlWithParams = queryCondition.buildSql(context.adapter(), context.physicalSchema());
+        return sqlExecutor.sqlQueryWithLimit(context.dataSource(), sqlWithParams.sql(),
+                        sqlWithParams.params().toArray())
+                .stream()
                 .map(context.adapter()::normalizeRow)
                 .toList();
     }

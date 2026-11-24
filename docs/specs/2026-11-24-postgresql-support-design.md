@@ -24,7 +24,7 @@
 | 同一 PG 数据库内多 schema 并存 | 一个数据源绑定一个物理 schema（默认 `public`） |
 | 跨 schema 外键自动导入 | 检测到后跳过并打 warn 日志，不做错误映射 |
 | 应用自身元数据库切到 PG | 应用仍使用 SQLite / MySQL 存 `table_relation`、`database_connection_info`（见 §6） |
-| SQL 参数化改造 | 属于 PR #2「防止 SQL 注入」，本期只做方言化，不扩大改动面 |
+| SQL 参数化改造 | 本期只做方言化；参数化在后续提交完成，见 `2026-11-24-parameterized-query.md` |
 | 复合类型 / 几何类型深度支持 | `text[]` 归一化为 `array`，其余自定义类型按符号安全化后原样展示 |
 
 ## 2. 现状分析：MySQL 耦合点
@@ -281,7 +281,7 @@ ORDER BY cl.relname, a.attnum
 
 顺带修掉现有问题：BFS 关联查询里如果字段是布尔型，JDBC 返回 `Boolean`，原实现会拼出 `'true'`，MySQL 下是错误值；方言化后 MySQL 拼 `1`，PG 拼 `TRUE`。
 
-> 假设 PG 使用默认的 `standard_conforming_strings=on`，此时 `''` 转义是标准行为。这不是参数化改造，SQL 注入问题仍由 PR #2 处理。
+> 假设 PG 使用默认的 `standard_conforming_strings=on`，此时 `''` 转义是标准行为。条件值后续已改为参数化绑定，见 `2026-11-24-parameterized-query.md`。
 
 #### 类型归一化
 
@@ -527,5 +527,5 @@ VALUES (1, 'PAID', 99.99, now()), (2, 'NEW', 10, now());
 
 1. 多 schema：registry key 改为 `database.schema`，前端 schema 下拉展示两级；跨 schema 外键自动导入。
 2. Testcontainers 集成测试，CI 可选任务中执行。
-3. 查询参数化（与 PR #2 合并），彻底解决 SQL 注入。
+3. ~~查询参数化~~ 已完成，见 `2026-11-24-parameterized-query.md`；剩余风险是表关系「关联条件」的原始 SQL 片段。
 4. 支持更多数据源类型（SQL Server / Oracle）：新增一个 `DatabaseAdapter` 即可。
