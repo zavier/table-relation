@@ -85,7 +85,10 @@ public class PostgresDatabaseAdapter extends BaseDatabaseAdapter {
 
     @Override
     public String buildJdbcUrl(DataSourceConfig dataSourceConfig) {
-        return String.format("jdbc:postgresql://%s:%d/%s?ApplicationName=table-relation",
+        // stringtype=unspecified：条件值统一以字符串绑定，由 PostgreSQL 按列类型推断，
+        // 避免 bigint/uuid/timestamp 等列出现 "operator does not exist" 错误
+        return String.format(
+                "jdbc:postgresql://%s:%d/%s?ApplicationName=table-relation&stringtype=unspecified",
                 dataSourceConfig.getHost(), dataSourceConfig.getPort(), dataSourceConfig.getDatabase());
     }
 
