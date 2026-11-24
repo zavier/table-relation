@@ -8,8 +8,6 @@
 ![Vue](https://img.shields.io/badge/Vue-3-42B883)
 ![Database](https://img.shields.io/badge/Database-MySQL%20%7C%20PostgreSQL-336791)
 
-在线体验：<https://zhengw-tech.com/table/index.html>
-
 ![数据查询](images/data-query.png)
 
 ## 这个工具解决什么问题
