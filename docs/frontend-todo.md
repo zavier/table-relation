@@ -19,18 +19,19 @@
 
 ## P1：静态检查与构建约束
 
-- [ ] 接入 ESLint + Prettier（`eslint-plugin-vue`），修复存量告警
-- [ ] `package.json` 增加 `lint`、`format` 脚本
-- [ ] CI 增加 `npm run lint`（在 Maven 构建前或独立 job）
-- [ ] 固定 Node 版本（`engines` + `.nvmrc`），与 `pom.xml` 中 `node.version` 保持一致
+- [x] 接入 ESLint + Prettier（`eslint-plugin-vue`），修复存量告警
+- [x] `package.json` 增加 `lint`、`format`、`format:check` 脚本
+- [x] CI 增加 `npm run lint` 与 `npm run format:check`
+- [x] 固定 Node 版本（`engines` + `.nvmrc`），与 `pom.xml` 中 `node.version` 保持一致
 
-验收：CI 在存在 lint 错误时失败；Node 版本三处一致。
+验收：CI 在存在 lint / 格式错误时失败；Node 版本三处一致。
 
 ## P1：测试
 
-- [ ] 引入 Vitest + @vue/test-utils
-- [ ] 覆盖核心逻辑：查询条件构造、关系表单校验、SQL 结果渲染
-- [ ] `npm run test` 接入 CI
+- [x] 引入 Vitest + @vue/test-utils（jsdom 环境）
+- [x] 覆盖 API 层（`Result` 解包、错误处理、接口路径）与数据库查询页状态流转
+- [x] `npm run test` 接入 CI
+- [ ] 补充表关系表单校验、ER 图渲染等页面用例
 
 验收：核心模块有单测，CI 执行通过。
 

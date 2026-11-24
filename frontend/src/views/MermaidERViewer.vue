@@ -26,7 +26,7 @@ const needTableInfo = ref(true) // 添加表信息显示选项
 // 初始化mermaid（跟随系统深浅色主题）
 const isDarkMode = document.documentElement.classList.contains('dark')
 mermaid.initialize({
-  startOnLoad: false,  // 修改为false，手动控制渲染时机
+  startOnLoad: false, // 修改为false，手动控制渲染时机
   theme: isDarkMode ? 'dark' : 'default',
   securityLevel: 'loose',
   fontSize: 16,
@@ -174,7 +174,7 @@ onMounted(() => {
 <template>
   <div class="er-viewer">
     <h2>数据库ER图</h2>
-    
+
     <div class="controls">
       <!-- Schema选择 -->
       <el-select
@@ -227,29 +227,13 @@ onMounted(() => {
       </el-button>
 
       <!-- 放大按钮 -->
-      <el-button
-        type="primary"
-        @click="zoomIn"
-        :disabled="!erDiagram"
-      >
-        放大
-      </el-button>
+      <el-button type="primary" @click="zoomIn" :disabled="!erDiagram"> 放大 </el-button>
 
       <!-- 缩小按钮 -->
-      <el-button
-        type="primary"
-        @click="zoomOut"
-        :disabled="!erDiagram"
-      >
-        缩小
-      </el-button>
+      <el-button type="primary" @click="zoomOut" :disabled="!erDiagram"> 缩小 </el-button>
 
       <!-- 复制按钮 -->
-      <el-button
-        type="primary"
-        @click="copyMermaidCode"
-        :disabled="!erDiagram"
-      >
+      <el-button type="primary" @click="copyMermaidCode" :disabled="!erDiagram">
         复制代码
       </el-button>
     </div>

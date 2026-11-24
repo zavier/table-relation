@@ -1,12 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import {
-  addRelation,
-  deleteRelation,
-  listRelations,
-  updateRelation
-} from '../api/relation'
+import { addRelation, deleteRelation, listRelations, updateRelation } from '../api/relation'
 import { getAllSchemas, getSchemaTables, getTableColumns } from '../api/meta'
 
 // 表关系列表
@@ -28,7 +23,7 @@ const filteredRelationList = computed(() => {
   if (!selectedSchema.value) {
     return relationList.value
   }
-  return relationList.value.filter(item => item.tableSchema === selectedSchema.value)
+  return relationList.value.filter((item) => item.tableSchema === selectedSchema.value)
 })
 
 // 表单数据和规则
@@ -130,7 +125,11 @@ const handleReferencedTableChange = async () => {
   formData.value.referencedColumnName = ''
   referencedFields.value = []
   if (formData.value.referencedTableSchema && formData.value.referencedTableName) {
-    await fetchFields(formData.value.referencedTableSchema, formData.value.referencedTableName, true)
+    await fetchFields(
+      formData.value.referencedTableSchema,
+      formData.value.referencedTableName,
+      true
+    )
   }
 }
 
@@ -173,7 +172,11 @@ const openDialog = async (row) => {
     await fetchFields(formData.value.tableSchema, formData.value.tableName)
     // 加载关联表相关数据
     await fetchTables(formData.value.referencedTableSchema, true)
-    await fetchFields(formData.value.referencedTableSchema, formData.value.referencedTableName, true)
+    await fetchFields(
+      formData.value.referencedTableSchema,
+      formData.value.referencedTableName,
+      true
+    )
   } else {
     isEdit.value = false
     currentId.value = null
@@ -270,14 +273,9 @@ onMounted(() => {
         <el-button type="primary" @click="openDialog()">添加表关系</el-button>
       </div>
     </div>
-    
+
     <!-- 表关系列表 -->
-    <el-table
-      :data="filteredRelationList"
-      v-loading="loading"
-      style="width: 100%"
-      border
-    >
+    <el-table :data="filteredRelationList" v-loading="loading" style="width: 100%" border>
       <el-table-column prop="tableSchema" label="库名" />
       <el-table-column prop="tableName" label="表名" />
       <el-table-column prop="columnName" label="表字段" />
@@ -287,31 +285,29 @@ onMounted(() => {
       <el-table-column prop="referencedColumnName" label="关联表字段" />
       <el-table-column prop="relationType" label="关联类型" width="100">
         <template #default="{ row }">
-          <span>{{ row.relationType === 1 ? '一对一' 
-                        : row.relationType === 2 ? '一对多' 
-                                : row.relationTsype === 3 ? '多对多' : '' }}</span>
+          <span>{{
+            row.relationType === 1
+              ? '一对一'
+              : row.relationType === 2
+                ? '一对多'
+                : row.relationTsype === 3
+                  ? '多对多'
+                  : ''
+          }}</span>
         </template>
       </el-table-column>
       <el-table-column label="操作" width="150" fixed="right">
         <template #default="{ row }">
           <el-button-group>
-            <el-button type="primary" @click="openDialog(row)" link>
-              编辑
-            </el-button>
-            <el-button type="danger" @click="handleDelete(row.id)" link>
-              删除
-            </el-button>
+            <el-button type="primary" @click="openDialog(row)" link> 编辑 </el-button>
+            <el-button type="danger" @click="handleDelete(row.id)" link> 删除 </el-button>
           </el-button-group>
         </template>
       </el-table-column>
     </el-table>
 
     <!-- 添加/编辑表关系对话框 -->
-    <el-dialog
-      :title="isEdit ? '编辑表关系' : '添加表关系'"
-      v-model="dialogVisible"
-      width="500px"
-    >
+    <el-dialog :title="isEdit ? '编辑表关系' : '添加表关系'" v-model="dialogVisible" width="500px">
       <el-form
         ref="formRef"
         :model="formData"
@@ -320,45 +316,112 @@ onMounted(() => {
         class="relation-form"
       >
         <el-form-item label="库名" prop="tableSchema">
-          <el-select v-model="formData.tableSchema" placeholder="请选择库名" @change="handleSchemaChange" filterable>
-            <el-option v-for="item in schemas" :key="item.value" :label="item.label" :value="item.value" />
+          <el-select
+            v-model="formData.tableSchema"
+            placeholder="请选择库名"
+            @change="handleSchemaChange"
+            filterable
+          >
+            <el-option
+              v-for="item in schemas"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
-        
+
         <el-form-item label="表名" prop="tableName">
-          <el-select v-model="formData.tableName" placeholder="请选择表名" :disabled="!formData.tableSchema" @change="handleTableChange" filterable>
-            <el-option v-for="item in tables" :key="item.value" :label="item.label" :value="item.value" />
+          <el-select
+            v-model="formData.tableName"
+            placeholder="请选择表名"
+            :disabled="!formData.tableSchema"
+            @change="handleTableChange"
+            filterable
+          >
+            <el-option
+              v-for="item in tables"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
-        
+
         <el-form-item label="表字段" prop="columnName">
-          <el-select v-model="formData.columnName" placeholder="请选择表字段" :disabled="!formData.tableName" filterable>
-            <el-option v-for="item in fields" :key="item.value" :label="item.label" :value="item.value" />
+          <el-select
+            v-model="formData.columnName"
+            placeholder="请选择表字段"
+            :disabled="!formData.tableName"
+            filterable
+          >
+            <el-option
+              v-for="item in fields"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
 
         <el-form-item label="关联条件" prop="condition">
-          <el-input v-model="formData.condition" placeholder="请输入关联条件" type="textarea" :rows="3" />
+          <el-input
+            v-model="formData.condition"
+            placeholder="请输入关联条件"
+            type="textarea"
+            :rows="3"
+          />
         </el-form-item>
-        
+
         <el-form-item label="关联库名" prop="referencedTableSchema">
-          <el-select v-model="formData.referencedTableSchema" placeholder="请选择关联库名" @change="handleReferencedSchemaChange" filterable>
-            <el-option v-for="item in schemas" :key="item.value" :label="item.label" :value="item.value" />
+          <el-select
+            v-model="formData.referencedTableSchema"
+            placeholder="请选择关联库名"
+            @change="handleReferencedSchemaChange"
+            filterable
+          >
+            <el-option
+              v-for="item in schemas"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
-        
+
         <el-form-item label="关联表名" prop="referencedTableName">
-          <el-select v-model="formData.referencedTableName" placeholder="请选择关联表名" :disabled="!formData.referencedTableSchema" @change="handleReferencedTableChange" filterable>
-            <el-option v-for="item in referencedTables" :key="item.value" :label="item.label" :value="item.value" />
+          <el-select
+            v-model="formData.referencedTableName"
+            placeholder="请选择关联表名"
+            :disabled="!formData.referencedTableSchema"
+            @change="handleReferencedTableChange"
+            filterable
+          >
+            <el-option
+              v-for="item in referencedTables"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
-        
+
         <el-form-item label="关联表字段" prop="referencedColumnName">
-          <el-select v-model="formData.referencedColumnName" placeholder="请选择关联表字段" :disabled="!formData.referencedTableName" filterable>
-            <el-option v-for="item in referencedFields" :key="item.value" :label="item.label" :value="item.value" />
+          <el-select
+            v-model="formData.referencedColumnName"
+            placeholder="请选择关联表字段"
+            :disabled="!formData.referencedTableName"
+            filterable
+          >
+            <el-option
+              v-for="item in referencedFields"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
-        
+
         <el-form-item label="关联类型" prop="relationType">
           <el-select v-model="formData.relationType" placeholder="请选择关联类型">
             <el-option label="一对一" :value="1" />
