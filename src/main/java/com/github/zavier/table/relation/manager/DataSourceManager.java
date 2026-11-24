@@ -1,8 +1,9 @@
 package com.github.zavier.table.relation.manager;
 
 import com.github.zavier.table.relation.dao.repository.DataSourceConfigRepository;
+import com.github.zavier.table.relation.service.db.DatabaseAdapter;
+import com.github.zavier.table.relation.service.db.DatabaseAdapterRegistry;
 import com.github.zavier.table.relation.service.dto.DataSourceConfig;
-import com.github.zavier.table.relation.utils.DataSourceUrlBuilder;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import jakarta.annotation.Resource;
@@ -28,6 +29,8 @@ public class DataSourceManager {
     private Initializer initializer;
     @Resource
     private RelationShipManager relationShipManager;
+    @Resource
+    private DatabaseAdapterRegistry databaseAdapterRegistry;
 
     public List<DataSourceConfig> listAllDataSourceConfig() {
         return dataSourceConfigRepository.listAllDataSourceConfig();
@@ -88,7 +91,8 @@ public class DataSourceManager {
     public boolean testDataSourceConfigConn(DataSourceConfig dataSourceConfig) {
         checkParam(dataSourceConfig);
 
-        final String url = DataSourceUrlBuilder.buildUrlForMySql(dataSourceConfig);
+        final DatabaseAdapter adapter = databaseAdapterRegistry.get(dataSourceConfig.getDatabaseType());
+        final String url = adapter.buildJdbcUrl(dataSourceConfig);
         try {
             final HikariConfig hikariConfig = new HikariConfig();
             hikariConfig.setJdbcUrl(url);

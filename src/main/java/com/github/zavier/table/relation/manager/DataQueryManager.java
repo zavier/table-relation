@@ -1,8 +1,8 @@
 package com.github.zavier.table.relation.manager;
 
 import com.github.zavier.table.relation.service.DataSourceRegistry;
-import com.github.zavier.table.relation.service.extpt.MySqlTableMetaInfoQuery;
 import com.github.zavier.table.relation.service.SqlExecutor;
+import com.github.zavier.table.relation.service.db.DataSourceContext;
 import com.github.zavier.table.relation.service.domain.ColumnInfo;
 import com.github.zavier.table.relation.service.domain.TableColumnInfo;
 import com.github.zavier.table.relation.service.dto.Condition;
@@ -16,7 +16,6 @@ import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
-import javax.sql.DataSource;
 import java.util.*;
 
 @Service
@@ -28,8 +27,6 @@ public class DataQueryManager {
     private DataSourceRegistry dataSourceRegistry;
     @Resource
     private SqlExecutor sqlExecutor;
-    @Resource
-    private MySqlTableMetaInfoQuery mySqlTableMetaInfoQuery;
 
     public Result<List<String>> getAllSchema() {
         final List<String> allSchema = dataSourceRegistry.getAllSchema();
@@ -66,13 +63,13 @@ public class DataQueryManager {
     public Result<List<TableColumnInfo>> getTableColumnInfos(String schema) {
         Validate.notBlank(schema, "schema can not be blank");
 
-        final Optional<DataSource> sourceOptional = dataSourceRegistry.getDataSource(schema);
-        if (sourceOptional.isEmpty()) {
+        final Optional<DataSourceContext> contextOptional = dataSourceRegistry.getContext(schema);
+        if (contextOptional.isEmpty()) {
             return Result.success(List.of());
         }
-        final DataSource dataSource = sourceOptional.get();
+        final DataSourceContext context = contextOptional.get();
 
-        return Result.success(mySqlTableMetaInfoQuery.getTableColumnMetaInfo(schema, dataSource));
+        return Result.success(context.adapter().listTableColumns(context));
     }
 
     public Result<Map<String, List<String>>> generateInsertSql(QueryCondition queryCondition) {
@@ -87,8 +84,11 @@ public class DataQueryManager {
         Map<String, List<String>> schemaSqlMap = new HashMap<>();
 
         schemaTableDataMap.forEach((schema, tableDataMap) -> {
+            final DataSourceContext context = dataSourceRegistry.getContext(schema)
+                    .orElseThrow(() -> new RuntimeException("dataSource not found:" + schema));
             tableDataMap.forEach((tableName, dataMapList) -> {
-                final String sql = SqlBuilder.generateInsertSql(tableName, dataMapList);
+                final String sql = SqlBuilder.generateInsertSql(
+                        context.adapter(), context.physicalSchema(), tableName, dataMapList);
                 schemaSqlMap.computeIfAbsent(schema, (v) -> new ArrayList<>()).add(sql);
             });
         });
@@ -183,11 +183,10 @@ public class DataQueryManager {
         Validate.notBlank(schema, "schema can not be blank");
         Validate.notBlank(tableName, "tableName can not be blank");
 
-        final Optional<DataSource> sourceOptional = dataSourceRegistry.getDataSource(schema);
-        Validate.isTrue(sourceOptional.isPresent(), "dataSource not found:" + schema);
-        final DataSource dataSource = sourceOptional.get();
+        final DataSourceContext context = dataSourceRegistry.getContext(schema)
+                .orElseThrow(() -> new IllegalArgumentException("dataSource not found:" + schema));
 
-        return mySqlTableMetaInfoQuery.getTableColumnMetaInfo(schema, tableName, dataSource);
+        return context.adapter().describeTable(context, tableName);
     }
 
     private static void checkParam(QueryCondition queryCondition) {

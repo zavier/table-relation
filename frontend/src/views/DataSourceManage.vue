@@ -14,15 +14,25 @@ const dataSourceList = ref([])
 const loading = ref(false)
 
 // 表单数据和规则
-const formData = ref({
+const defaultForm = () => ({
+  databaseType: 'MYSQL',
   host: '',
   username: '',
   password: '',
   database: '',
+  schemaName: 'public',
   port: '3306'
 })
 
+const defaultPorts = {
+  MYSQL: '3306',
+  POSTGRESQL: '5432'
+}
+
+const formData = ref(defaultForm())
+
 const rules = {
+  databaseType: [{ required: true, message: '请选择数据库类型', trigger: 'change' }],
   host: [{ required: true, message: '请输入主机地址', trigger: 'blur' }],
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
@@ -31,6 +41,17 @@ const rules = {
     { required: true, message: '请输入端口号', trigger: 'blur' },
     { pattern: /^[0-9]+$/, message: '端口号必须为数字', trigger: 'blur' }
   ]
+}
+
+// 切换数据库类型时，如果端口仍是另一类型的默认端口，则自动切换
+const handleTypeChange = (type) => {
+  const currentPort = String(formData.value.port ?? '')
+  const otherDefaultPorts = Object.entries(defaultPorts)
+    .filter(([key]) => key !== type)
+    .map(([, value]) => value)
+  if (!currentPort || otherDefaultPorts.includes(currentPort)) {
+    formData.value.port = defaultPorts[type] ?? defaultPorts.MYSQL
+  }
 }
 
 const formRef = ref(null)
@@ -55,17 +76,16 @@ const openDialog = (row) => {
   if (row) {
     isEdit.value = true
     currentId.value = row.id
-    formData.value = { ...row }
+    formData.value = {
+      ...defaultForm(),
+      ...row,
+      databaseType: row.databaseType || 'MYSQL',
+      schemaName: row.schemaName || 'public'
+    }
   } else {
     isEdit.value = false
     currentId.value = null
-    formData.value = {
-      host: '',
-      username: '',
-      password: '',
-      database: '',
-      port: '3306'
-    }
+    formData.value = defaultForm()
     formRef.value?.resetFields()
   }
   dialogVisible.value = true
@@ -142,9 +162,21 @@ onMounted(() => {
 
     <!-- 数据源列表 -->
     <el-table :data="dataSourceList" v-loading="loading" style="width: 100%" border>
+      <el-table-column label="类型" width="130">
+        <template #default="{ row }">
+          <el-tag :type="row.databaseType === 'POSTGRESQL' ? 'success' : 'info'">
+            {{ row.databaseType || 'MYSQL' }}
+          </el-tag>
+        </template>
+      </el-table-column>
       <el-table-column prop="host" label="主机地址" />
       <el-table-column prop="username" label="用户名" />
       <el-table-column prop="database" label="数据库名" />
+      <el-table-column label="Schema" width="120">
+        <template #default="{ row }">
+          {{ row.databaseType === 'POSTGRESQL' ? row.schemaName || 'public' : '-' }}
+        </template>
+      </el-table-column>
       <el-table-column prop="port" label="端口号" width="100" />
       <el-table-column label="操作" width="250" fixed="right">
         <template #default="{ row }">
@@ -166,6 +198,13 @@ onMounted(() => {
         label-width="120px"
         class="datasource-form"
       >
+        <el-form-item label="数据库类型" prop="databaseType">
+          <el-select v-model="formData.databaseType" @change="handleTypeChange">
+            <el-option label="MySQL" value="MYSQL" />
+            <el-option label="PostgreSQL" value="POSTGRESQL" />
+          </el-select>
+        </el-form-item>
+
         <el-form-item label="主机地址" prop="host">
           <el-input v-model="formData.host" placeholder="请输入主机地址" />
         </el-form-item>
@@ -185,6 +224,14 @@ onMounted(() => {
 
         <el-form-item label="数据库名" prop="database">
           <el-input v-model="formData.database" placeholder="请输入数据库名" />
+        </el-form-item>
+
+        <el-form-item
+          v-if="formData.databaseType === 'POSTGRESQL'"
+          label="Schema"
+          prop="schemaName"
+        >
+          <el-input v-model="formData.schemaName" placeholder="默认为 public" />
         </el-form-item>
 
         <el-form-item label="端口号" prop="port">

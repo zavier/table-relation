@@ -4,7 +4,7 @@ import com.github.zavier.table.relation.dao.repository.TableRelationRepository;
 import com.github.zavier.table.relation.manager.ai.TableRelationAnalyzer;
 import com.github.zavier.table.relation.service.DataSourceRegistry;
 import com.github.zavier.table.relation.service.constant.RelationType;
-import com.github.zavier.table.relation.service.extpt.MySqlTableMetaInfoQuery;
+import com.github.zavier.table.relation.service.db.DataSourceContext;
 import com.github.zavier.table.relation.service.TableRelationRegistry;
 import com.github.zavier.table.relation.service.domain.ColumnInfo;
 import com.github.zavier.table.relation.service.dto.ColumnUsage;
@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.sql.DataSource;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
@@ -36,8 +35,6 @@ public class RelationShipManager {
     private DataSourceRegistry dataSourceRegistry;
     @Resource
     private TableRelationRegistry tableRelationRegistry;
-    @Resource
-    private MySqlTableMetaInfoQuery mySqlTableMetaInfoQuery;
     @Resource
     private TableRelationAnalyzer tableRelationAnalyzer;
 
@@ -123,13 +120,12 @@ public class RelationShipManager {
     }
 
     public void refreshColumnUsage(String tableSchema) {
-        final Optional<DataSource> sourceOptional = dataSourceRegistry.getDataSource(tableSchema);
-        Validate.isTrue(sourceOptional.isPresent(), "dataSource not found:" + tableSchema);
-        final DataSource dataSource = sourceOptional.get();
+        final DataSourceContext context = dataSourceRegistry.getContext(tableSchema)
+                .orElseThrow(() -> new IllegalArgumentException("dataSource not found:" + tableSchema));
 
         final List<ColumnUsage> existColumnUsages = tableRelationRepository.listTableRelation(tableSchema);
 
-        final List<ColumnUsage> thisColumnUsageList = mySqlTableMetaInfoQuery.getTableRelationMetaInfo(tableSchema, dataSource);
+        final List<ColumnUsage> thisColumnUsageList = context.adapter().listForeignKeys(context);
 
         if (!thisColumnUsageList.isEmpty()) {
             thisColumnUsageList.forEach(thisUsage -> {
@@ -265,11 +261,9 @@ public class RelationShipManager {
     }
 
     private List<TableColumnInfo> getSchemaAllTableInfo(String schema) {
-        final Optional<DataSource> sourceOptional = dataSourceRegistry.getDataSource(schema);
-        Validate.isTrue(sourceOptional.isPresent(), "dataSource not found:" + schema);
-        final DataSource dataSource = sourceOptional.get();
-
-        return mySqlTableMetaInfoQuery.getTableColumnMetaInfo(schema, dataSource);
+        final DataSourceContext context = dataSourceRegistry.getContext(schema)
+                .orElseThrow(() -> new IllegalArgumentException("dataSource not found:" + schema));
+        return context.adapter().listTableColumns(context);
     }
 
     private boolean contains(List<ColumnUsage> columnUsages, ColumnUsage columnUsage) {

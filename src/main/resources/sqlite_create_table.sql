@@ -16,5 +16,7 @@ CREATE TABLE IF NOT EXISTS database_connection_info (
     host TEXT,
     username TEXT,
     password TEXT,
-    port INTEGER
+    port INTEGER,
+    database_type TEXT NOT NULL DEFAULT 'MYSQL',
+    schema_name TEXT
 );

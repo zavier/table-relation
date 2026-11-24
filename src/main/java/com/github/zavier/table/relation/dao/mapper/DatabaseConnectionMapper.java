@@ -1,6 +1,7 @@
 package com.github.zavier.table.relation.dao.mapper;
 
 import com.github.zavier.table.relation.dao.entity.DatabaseConnectionInfo;
+import com.github.zavier.table.relation.service.db.DatabaseType;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,22 +21,21 @@ public class DatabaseConnectionMapper {
 
     public List<DatabaseConnectionInfo> listAllDatabaseConnectionInfo() {
         String sql = "SELECT * FROM database_connection_info";
-        RowMapper<DatabaseConnectionInfo> rowMapper = (rs, rowNum) -> new DatabaseConnectionInfo(
-                rs.getInt("id"),
-                rs.getString("database"),
-                rs.getString("host"),
-                rs.getString("username"),
-                rs.getString("password"),
-                rs.getInt("port")
-        );
         log.info("listAllDatabaseConnectionInfo sql:{}", sql);
-        return jdbcTemplate.query(sql, rowMapper);
+        return jdbcTemplate.query(sql, rowMapper());
     }
 
     public void addDatabaseConnectionInfo(DatabaseConnectionInfo databaseConnectionInfo) {
-        String sql = "INSERT INTO database_connection_info (`database`, `host`, `username`, `password`, `port`) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO database_connection_info (`database`, `host`, `username`, `password`, `port`, `database_type`, `schema_name`) VALUES (?, ?, ?, ?, ?, ?, ?)";
         log.info("addDatabaseConnectionInfo sql:{}", sql);
-        final int update = jdbcTemplate.update(sql, databaseConnectionInfo.database(), databaseConnectionInfo.host(), databaseConnectionInfo.username(), databaseConnectionInfo.password(), databaseConnectionInfo.port());
+        final int update = jdbcTemplate.update(sql,
+                databaseConnectionInfo.database(),
+                databaseConnectionInfo.host(),
+                databaseConnectionInfo.username(),
+                databaseConnectionInfo.password(),
+                databaseConnectionInfo.port(),
+                databaseConnectionInfo.databaseType() == null ? DatabaseType.MYSQL.name() : databaseConnectionInfo.databaseType().name(),
+                databaseConnectionInfo.schemaName());
         if (update != 1) {
             throw new RuntimeException("添加数据库连接失败");
         }
@@ -51,7 +51,7 @@ public class DatabaseConnectionMapper {
     }
 
     public void updateDatabaseConnectionInfo(DatabaseConnectionInfo databaseConnectionInfo) {
-        String sql = "UPDATE database_connection_info SET `database` = ?, `host` = ?, `username` = ?, `password` = ?, `port` = ? WHERE id = ?";
+        String sql = "UPDATE database_connection_info SET `database` = ?, `host` = ?, `username` = ?, `password` = ?, `port` = ?, `database_type` = ?, `schema_name` = ? WHERE id = ?";
         log.info("updateDatabaseConnectionInfo sql:{}", sql);
         final int update = jdbcTemplate.update(sql,
                 databaseConnectionInfo.database(),
@@ -59,6 +59,8 @@ public class DatabaseConnectionMapper {
                 databaseConnectionInfo.username(),
                 databaseConnectionInfo.password(),
                 databaseConnectionInfo.port(),
+                databaseConnectionInfo.databaseType() == null ? DatabaseType.MYSQL.name() : databaseConnectionInfo.databaseType().name(),
+                databaseConnectionInfo.schemaName(),
                 databaseConnectionInfo.id());
         if (update != 1) {
             throw new RuntimeException("更新数据库连接失败");
@@ -68,14 +70,19 @@ public class DatabaseConnectionMapper {
     public DatabaseConnectionInfo getDatabaseConnectionInfo(Integer id) {
         String sql = "SELECT * FROM database_connection_info WHERE id = ?";
         log.info("getDatabaseConnectionInfo sql:{}", sql);
-        RowMapper<DatabaseConnectionInfo> rowMapper = (rs, rowNum) -> new DatabaseConnectionInfo(
+        return jdbcTemplate.queryForObject(sql, rowMapper(), id);
+    }
+
+    private RowMapper<DatabaseConnectionInfo> rowMapper() {
+        return (rs, rowNum) -> new DatabaseConnectionInfo(
                 rs.getInt("id"),
                 rs.getString("database"),
                 rs.getString("host"),
                 rs.getString("username"),
                 rs.getString("password"),
-                rs.getInt("port")
+                rs.getInt("port"),
+                DatabaseType.from(rs.getString("database_type")),
+                rs.getString("schema_name")
         );
-        return jdbcTemplate.queryForObject(sql, rowMapper, id);
     }
 }

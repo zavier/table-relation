@@ -1,9 +1,9 @@
 package com.github.zavier.table.relation.service.dto;
 
+import com.github.zavier.table.relation.service.db.DatabaseAdapter;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class QueryCondition {
@@ -14,13 +14,12 @@ public class QueryCondition {
     private List<String> customizeConditionSqlList;
     private String logicNoDeleteCondition;
 
-    public String buildSql() {
-        final String schema = this.getSchema();
+    public String buildSql(DatabaseAdapter adapter, String physicalSchema) {
         final String tableName = this.getTable();
         final List<Condition> conditionList = this.getConditions();
 
         StringBuilder sql = new StringBuilder();
-        sql.append("select * from ").append(schema).append(".").append(tableName);
+        sql.append("select * from ").append(adapter.tableRef(physicalSchema, tableName));
         if (conditionList != null && !conditionList.isEmpty()) {
             sql.append(" where ");
             for (int i = 0; i < conditionList.size(); i++) {
@@ -29,7 +28,7 @@ public class QueryCondition {
                 final String operator = condition.getOperator();
                 final Object value = condition.getValue();
                 // TODO SQL注入
-                sql.append(column).append(" ").append(operator).append(" ").append(convertSqlValue(value));
+                sql.append(adapter.quoteIdentifier(column)).append(" ").append(operator).append(" ").append(adapter.literal(value));
                 if (i < conditionList.size() - 1) {
                     sql.append(" and ");
                 }
@@ -44,20 +43,6 @@ public class QueryCondition {
             sql.append(" and ").append(logicNoDeleteCondition);
         }
         return sql.toString();
-    }
-
-    private String convertSqlValue(Object value) {
-        if (value instanceof Collection<?>) {
-            Collection<?> collection = (Collection<?>) value;
-            List<String> values = new ArrayList<>();
-            for (Object obj : collection) {
-                values.add(convertSqlValue(obj));
-            }
-            return "(" + String.join(",", values) + ")";
-        } else if (value instanceof Number) {
-            return value.toString();
-        }
-        return "'" + value.toString() + "'";
     }
 
 

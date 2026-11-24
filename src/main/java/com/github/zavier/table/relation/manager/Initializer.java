@@ -1,5 +1,6 @@
 package com.github.zavier.table.relation.manager;
 
+import com.github.zavier.table.relation.dao.SchemaMigrator;
 import com.github.zavier.table.relation.dao.entity.TableRelation;
 import com.github.zavier.table.relation.dao.mapper.TableRelationMapper;
 import com.github.zavier.table.relation.dao.repository.DataSourceConfigRepository;
@@ -8,7 +9,6 @@ import com.github.zavier.table.relation.service.TableRelationRegistry;
 import com.github.zavier.table.relation.service.domain.Column;
 import com.github.zavier.table.relation.service.domain.ColumnRelation;
 import com.github.zavier.table.relation.service.dto.DataSourceConfig;
-import com.github.zavier.table.relation.utils.DataSourceUrlBuilder;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
@@ -30,10 +30,13 @@ public class Initializer {
     private TableRelationMapper tableRelationMapper;
     @Resource
     private DataSourceConfigRepository dataSourceConfigRepository;
+    @Resource
+    private SchemaMigrator schemaMigrator;
 
 
     @PostConstruct
     public void init() {
+        schemaMigrator.migrate();
         refreshDataSource();
         refreshTableRelation();
     }
@@ -43,11 +46,7 @@ public class Initializer {
         dataSourceRegistry.clear();
 
         final List<DataSourceConfig> dataSourceConfigs = dataSourceConfigRepository.listAllDataSourceConfig();
-        dataSourceConfigs.forEach(dataSourceConfig -> {
-            // 目前仅支持mysql
-            final String jdbcUrl = DataSourceUrlBuilder.buildUrlForMySql(dataSourceConfig);
-            dataSourceRegistry.addDataSource(dataSourceConfig.getDatabase(), jdbcUrl, dataSourceConfig.getUsername(), dataSourceConfig.getPassword());
-        });
+        dataSourceConfigs.forEach(dataSourceRegistry::addDataSource);
     }
 
     public void refreshTableRelation() {
