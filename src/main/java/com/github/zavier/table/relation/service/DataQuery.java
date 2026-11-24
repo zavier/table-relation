@@ -1,5 +1,6 @@
 package com.github.zavier.table.relation.service;
 
+import com.github.zavier.table.relation.service.db.DataSourceContext;
 import com.github.zavier.table.relation.service.domain.Column;
 import com.github.zavier.table.relation.service.dto.Condition;
 import com.github.zavier.table.relation.service.dto.QueryCondition;
@@ -9,7 +10,6 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.sql.DataSource;
 import java.util.*;
 
 @Component
@@ -111,18 +111,18 @@ public class DataQuery {
 
     private List<Map<String, Object>> executeQuery(QueryCondition queryCondition) {
         final String schema = queryCondition.getSchema();
-        final Optional<DataSource> sourceOptional = dataSourceRegistry.getDataSource(schema);
-        if (sourceOptional.isEmpty()) {
-            throw new RuntimeException("dataSource not found:" + schema);
-        }
+        final DataSourceContext context = dataSourceRegistry.getContext(schema)
+                .orElseThrow(() -> new RuntimeException("dataSource not found:" + schema));
 
         // 增加逻辑删除条件
         if (StringUtils.isNotBlank(logicNoDeleteCondition)) {
             queryCondition.setLogicNoDeleteCondition(logicNoDeleteCondition);
         }
 
-        final DataSource dataSource = sourceOptional.get();
-        return sqlExecutor.sqlQueryWithLimit(dataSource, queryCondition.buildSql());
+        final String sql = queryCondition.buildSql(context.adapter(), context.physicalSchema());
+        return sqlExecutor.sqlQueryWithLimit(context.dataSource(), sql).stream()
+                .map(context.adapter()::normalizeRow)
+                .toList();
     }
 
 }

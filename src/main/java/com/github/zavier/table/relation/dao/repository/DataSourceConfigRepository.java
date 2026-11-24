@@ -17,28 +17,11 @@ public class DataSourceConfigRepository {
 
     public List<DataSourceConfig> listAllDataSourceConfig() {
         final List<DatabaseConnectionInfo> databaseConnectionInfos = databaseConnectionMapper.listAllDatabaseConnectionInfo();
-        return databaseConnectionInfos.stream().map(databaseConnectionInfo -> {
-            DataSourceConfig dataSourceConfig = new DataSourceConfig();
-            dataSourceConfig.setId(databaseConnectionInfo.id());
-            dataSourceConfig.setDatabase(databaseConnectionInfo.database());
-            dataSourceConfig.setHost(databaseConnectionInfo.host());
-            dataSourceConfig.setUsername(databaseConnectionInfo.username());
-            dataSourceConfig.setPassword(databaseConnectionInfo.password());
-            dataSourceConfig.setPort(databaseConnectionInfo.port());
-            return dataSourceConfig;
-        }).toList();
+        return databaseConnectionInfos.stream().map(this::toDataSourceConfig).toList();
     }
 
     public void addDataSource(DataSourceConfig dataSourceConfig) {
-        DatabaseConnectionInfo databaseConnectionInfo = new DatabaseConnectionInfo(
-                null,
-                dataSourceConfig.getDatabase(),
-                dataSourceConfig.getHost(),
-                dataSourceConfig.getUsername(),
-                dataSourceConfig.getPassword(),
-                dataSourceConfig.getPort()
-        );
-        databaseConnectionMapper.addDatabaseConnectionInfo(databaseConnectionInfo);
+        databaseConnectionMapper.addDatabaseConnectionInfo(toDatabaseConnectionInfo(null, dataSourceConfig));
     }
 
     public void deleteDataSource(Integer id) {
@@ -46,15 +29,8 @@ public class DataSourceConfigRepository {
     }
 
     public void updateDataSource(DataSourceConfig dataSourceConfig) {
-        DatabaseConnectionInfo databaseConnectionInfo = new DatabaseConnectionInfo(
-                dataSourceConfig.getId(),
-                dataSourceConfig.getDatabase(),
-                dataSourceConfig.getHost(),
-                dataSourceConfig.getUsername(),
-                dataSourceConfig.getPassword(),
-                dataSourceConfig.getPort()
-        );
-        databaseConnectionMapper.updateDatabaseConnectionInfo(databaseConnectionInfo);
+        databaseConnectionMapper.updateDatabaseConnectionInfo(
+                toDatabaseConnectionInfo(dataSourceConfig.getId(), dataSourceConfig));
     }
 
     public @Nullable DataSourceConfig getDataSourceConfig(Integer id) {
@@ -62,6 +38,23 @@ public class DataSourceConfigRepository {
         if (databaseConnectionInfo == null) {
             return null;
         }
+        return toDataSourceConfig(databaseConnectionInfo);
+    }
+
+    private DatabaseConnectionInfo toDatabaseConnectionInfo(Integer id, DataSourceConfig dataSourceConfig) {
+        return new DatabaseConnectionInfo(
+                id,
+                dataSourceConfig.getDatabase(),
+                dataSourceConfig.getHost(),
+                dataSourceConfig.getUsername(),
+                dataSourceConfig.getPassword(),
+                dataSourceConfig.getPort(),
+                dataSourceConfig.getDatabaseType(),
+                dataSourceConfig.getSchemaName()
+        );
+    }
+
+    private DataSourceConfig toDataSourceConfig(DatabaseConnectionInfo databaseConnectionInfo) {
         DataSourceConfig dataSourceConfig = new DataSourceConfig();
         dataSourceConfig.setId(databaseConnectionInfo.id());
         dataSourceConfig.setDatabase(databaseConnectionInfo.database());
@@ -69,8 +62,8 @@ public class DataSourceConfigRepository {
         dataSourceConfig.setUsername(databaseConnectionInfo.username());
         dataSourceConfig.setPassword(databaseConnectionInfo.password());
         dataSourceConfig.setPort(databaseConnectionInfo.port());
+        dataSourceConfig.setDatabaseType(databaseConnectionInfo.databaseType());
+        dataSourceConfig.setSchemaName(databaseConnectionInfo.schemaName());
         return dataSourceConfig;
     }
-
-
 }
