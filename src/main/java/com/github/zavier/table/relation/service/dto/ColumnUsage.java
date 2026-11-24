@@ -5,7 +5,9 @@ public class ColumnUsage {
     private String tableSchema;
     private String tableName;
     private String columnName;
-    private String condition;
+    private String conditionField;
+    private String conditionOperator;
+    private String conditionValue;
     private String referencedTableSchema;
     private String referencedTableName;
     private String referencedColumnName;
@@ -44,12 +46,28 @@ public class ColumnUsage {
         this.columnName = columnName;
     }
 
-    public String getCondition() {
-        return condition;
+    public String getConditionField() {
+        return conditionField;
     }
 
-    public void setCondition(String condition) {
-        this.condition = condition;
+    public void setConditionField(String conditionField) {
+        this.conditionField = conditionField;
+    }
+
+    public String getConditionOperator() {
+        return conditionOperator;
+    }
+
+    public void setConditionOperator(String conditionOperator) {
+        this.conditionOperator = conditionOperator;
+    }
+
+    public String getConditionValue() {
+        return conditionValue;
+    }
+
+    public void setConditionValue(String conditionValue) {
+        this.conditionValue = conditionValue;
     }
 
     public String getReferencedTableSchema() {
@@ -91,7 +109,9 @@ public class ColumnUsage {
                 ", tableSchema='" + tableSchema + '\'' +
                 ", tableName='" + tableName + '\'' +
                 ", columnName='" + columnName + '\'' +
-                ", condition='" + condition + '\'' +
+                ", conditionField='" + conditionField + '\'' +
+                ", conditionOperator='" + conditionOperator + '\'' +
+                ", conditionValue='" + conditionValue + '\'' +
                 ", referencedTableSchema='" + referencedTableSchema + '\'' +
                 ", referencedTableName='" + referencedTableName + '\'' +
                 ", referencedColumnName='" + referencedColumnName + '\'' +

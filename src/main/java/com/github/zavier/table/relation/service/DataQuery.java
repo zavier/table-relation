@@ -74,9 +74,9 @@ public class DataQuery {
                     }
 
                     // 如果表有条件限制，则需要使用限制后的数据做关联查询(之前查询结果不影响)
-                    if (StringUtils.isNotBlank(column.condition())) {
-                        currentCondition.addCustomizeConditionSql(column.condition());
-                        dataMapList = executeQuery(currentCondition);
+                    if (column.condition() != null) {
+                        dataMapList = executeQuery(
+                                currentCondition.withAdditionalCondition(column.condition().toCondition()));
                     }
 
                     final List<Object> valueList = dataMapList.stream()
@@ -96,11 +96,12 @@ public class DataQuery {
                     innerCondition.setField(referencedColumn.columnName());
                     innerCondition.setOperator("IN");
                     innerCondition.setValue(valueList);
-                    innerQueryCondition.setConditions(List.of(innerCondition));
-
-                    if (StringUtils.isNotBlank(referencedColumn.condition())) {
-                        innerQueryCondition.addCustomizeConditionSql(referencedColumn.condition());
+                    final List<Condition> innerConditions = new ArrayList<>();
+                    innerConditions.add(innerCondition);
+                    if (referencedColumn.condition() != null) {
+                        innerConditions.add(referencedColumn.condition().toCondition());
                     }
+                    innerQueryCondition.setConditions(innerConditions);
                     log.info("enqueue queryCondition:{}", innerQueryCondition);
                     queue.add(innerQueryCondition);
                 }

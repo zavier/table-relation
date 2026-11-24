@@ -27,7 +27,9 @@ public class TableRelationRepository {
         columnUsage.setTableSchema(tableRelation.tableSchema());
         columnUsage.setTableName(tableRelation.tableName());
         columnUsage.setColumnName(tableRelation.columnName());
-        columnUsage.setCondition(tableRelation.condition());
+        columnUsage.setConditionField(tableRelation.conditionField());
+        columnUsage.setConditionOperator(tableRelation.conditionOperator());
+        columnUsage.setConditionValue(tableRelation.conditionValue());
         columnUsage.setReferencedTableSchema(tableRelation.referencedTableSchema());
         columnUsage.setReferencedTableName(tableRelation.referencedTableName());
         columnUsage.setReferencedColumnName(tableRelation.referencedColumnName());
@@ -41,18 +43,7 @@ public class TableRelationRepository {
     }
 
     public void addTableRelation(ColumnUsage columnUsage) {
-        final TableRelation tableRelation = new TableRelation(
-                null,
-                columnUsage.getTableSchema(),
-                columnUsage.getTableName(),
-                columnUsage.getColumnName(),
-                columnUsage.getCondition(),
-                columnUsage.getReferencedTableSchema(),
-                columnUsage.getReferencedTableName(),
-                columnUsage.getReferencedColumnName(),
-                RelationType.getRelationType(columnUsage.getRelationType())
-        );
-        tableRelationMapper.addTableRelation(tableRelation);
+        tableRelationMapper.addTableRelation(toTableRelation(null, columnUsage));
     }
 
     public void deleteTableRelation(Integer id) {
@@ -60,19 +51,22 @@ public class TableRelationRepository {
     }
 
     public void updateTableRelation(ColumnUsage columnUsage) {
-        final TableRelation tableRelation = new TableRelation(
-                columnUsage.getId(),
+        tableRelationMapper.updateTableRelation(toTableRelation(columnUsage.getId(), columnUsage));
+    }
+
+    private TableRelation toTableRelation(Integer id, ColumnUsage columnUsage) {
+        return new TableRelation(
+                id,
                 columnUsage.getTableSchema(),
                 columnUsage.getTableName(),
                 columnUsage.getColumnName(),
-                columnUsage.getCondition(),
+                columnUsage.getConditionField(),
+                columnUsage.getConditionOperator(),
+                columnUsage.getConditionValue(),
                 columnUsage.getReferencedTableSchema(),
                 columnUsage.getReferencedTableName(),
                 columnUsage.getReferencedColumnName(),
                 RelationType.getRelationType(columnUsage.getRelationType())
         );
-        tableRelationMapper.updateTableRelation(tableRelation);
     }
-
-
 }

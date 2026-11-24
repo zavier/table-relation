@@ -177,7 +177,6 @@ public class MySqlDatabaseAdapter extends BaseDatabaseAdapter {
         columnUsage.setTableSchema(Objects.toString(row.get("TABLE_SCHEMA"), ""));
         columnUsage.setTableName(Objects.toString(row.get("TABLE_NAME"), ""));
         columnUsage.setColumnName(Objects.toString(row.get("COLUMN_NAME"), ""));
-        columnUsage.setCondition("");
         columnUsage.setReferencedTableSchema(Objects.toString(row.get("REFERENCED_TABLE_SCHEMA"), ""));
         columnUsage.setReferencedTableName(Objects.toString(row.get("REFERENCED_TABLE_NAME"), ""));
         columnUsage.setReferencedColumnName(Objects.toString(row.get("REFERENCED_COLUMN_NAME"), ""));

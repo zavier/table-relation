@@ -27,7 +27,7 @@ const filteredRelationList = computed(() => {
 })
 
 // 表单数据和规则
-const formData = ref({
+const emptyForm = () => ({
   tableSchema: '',
   tableName: '',
   columnName: '',
@@ -35,8 +35,12 @@ const formData = ref({
   referencedTableName: '',
   referencedColumnName: '',
   relationType: 1,
-  condition: ''
+  conditionField: '',
+  conditionOperator: '=',
+  conditionValue: ''
 })
+
+const formData = ref(emptyForm())
 
 // 获取schema列表
 const fetchSchemas = async () => {
@@ -93,6 +97,8 @@ const fetchFields = async (schema, table, isReferenced = false) => {
 const handleSchemaChange = async () => {
   formData.value.tableName = ''
   formData.value.columnName = ''
+  formData.value.conditionField = ''
+  formData.value.conditionValue = ''
   tables.value = []
   fields.value = []
   if (formData.value.tableSchema) {
@@ -103,6 +109,8 @@ const handleSchemaChange = async () => {
 // 监听主表表名变化
 const handleTableChange = async () => {
   formData.value.columnName = ''
+  formData.value.conditionField = ''
+  formData.value.conditionValue = ''
   fields.value = []
   if (formData.value.tableSchema && formData.value.tableName) {
     await fetchFields(formData.value.tableSchema, formData.value.tableName)
@@ -140,8 +148,7 @@ const rules = {
   referencedTableSchema: [{ required: true, message: '请输入关联库名', trigger: 'blur' }],
   referencedTableName: [{ required: true, message: '请输入关联表名', trigger: 'blur' }],
   referencedColumnName: [{ required: true, message: '请输入关联表字段', trigger: 'blur' }],
-  relationType: [{ required: true, message: '请选择关联类型', trigger: 'change' }],
-  condition: [{ required: false, message: '请输入关联条件', trigger: 'blur' }]
+  relationType: [{ required: true, message: '请选择关联类型', trigger: 'change' }]
 }
 
 const formRef = ref(null)
@@ -166,7 +173,13 @@ const openDialog = async (row) => {
   if (row) {
     isEdit.value = true
     currentId.value = row.id
-    formData.value = { ...row }
+    formData.value = {
+      ...emptyForm(),
+      ...row,
+      conditionField: row.conditionField || '',
+      conditionOperator: row.conditionOperator || '=',
+      conditionValue: row.conditionValue || ''
+    }
     // 加载主表相关数据
     await fetchTables(formData.value.tableSchema)
     await fetchFields(formData.value.tableSchema, formData.value.tableName)
@@ -181,16 +194,7 @@ const openDialog = async (row) => {
     isEdit.value = false
     currentId.value = null
     // 重置表单数据
-    formData.value = {
-      tableSchema: '',
-      tableName: '',
-      columnName: '',
-      referencedTableSchema: '',
-      referencedTableName: '',
-      referencedColumnName: '',
-      relationType: 1,
-      condition: ''
-    }
+    formData.value = emptyForm()
     // 清空相关的下拉选项数据
     tables.value = []
     fields.value = []
@@ -212,11 +216,21 @@ const handleSubmit = async () => {
     return
   }
 
+  const payload = { ...formData.value }
+  if (!payload.conditionField) {
+    // 未选择条件字段时，避免把默认运算符提交到后端
+    payload.conditionOperator = ''
+    payload.conditionValue = ''
+  } else if (!payload.conditionOperator || !payload.conditionValue) {
+    ElMessage.error('请完整填写关联条件的字段、运算符和值')
+    return
+  }
+
   try {
     if (isEdit.value) {
-      await updateRelation(formData.value)
+      await updateRelation(payload)
     } else {
-      await addRelation(formData.value)
+      await addRelation(payload)
     }
     ElMessage.success(isEdit.value ? '表关系更新成功' : '表关系添加成功')
     dialogVisible.value = false
@@ -279,7 +293,14 @@ onMounted(() => {
       <el-table-column prop="tableSchema" label="库名" />
       <el-table-column prop="tableName" label="表名" />
       <el-table-column prop="columnName" label="表字段" />
-      <el-table-column prop="condition" label="关联条件" />
+      <el-table-column label="关联条件" width="200">
+        <template #default="{ row }">
+          <span v-if="row.conditionField">
+            {{ row.conditionField }} {{ row.conditionOperator }} {{ row.conditionValue }}
+          </span>
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
       <el-table-column prop="referencedTableSchema" label="关联库名" />
       <el-table-column prop="referencedTableName" label="关联表名" />
       <el-table-column prop="referencedColumnName" label="关联表字段" />
@@ -307,7 +328,7 @@ onMounted(() => {
     </el-table>
 
     <!-- 添加/编辑表关系对话框 -->
-    <el-dialog :title="isEdit ? '编辑表关系' : '添加表关系'" v-model="dialogVisible" width="500px">
+    <el-dialog :title="isEdit ? '编辑表关系' : '添加表关系'" v-model="dialogVisible" width="600px">
       <el-form
         ref="formRef"
         :model="formData"
@@ -364,13 +385,42 @@ onMounted(() => {
           </el-select>
         </el-form-item>
 
-        <el-form-item label="关联条件" prop="condition">
-          <el-input
-            v-model="formData.condition"
-            placeholder="请输入关联条件"
-            type="textarea"
-            :rows="3"
-          />
+        <el-form-item label="关联条件">
+          <div class="condition-editor">
+            <el-select
+              v-model="formData.conditionField"
+              placeholder="字段（可选）"
+              clearable
+              filterable
+              class="condition-field"
+            >
+              <el-option
+                v-for="item in fields"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+            <el-select
+              v-model="formData.conditionOperator"
+              class="condition-operator"
+              :disabled="!formData.conditionField"
+            >
+              <el-option label="=" value="=" />
+              <el-option label="!=" value="!=" />
+              <el-option label=">" value=">" />
+              <el-option label=">=" value=">=" />
+              <el-option label="<" value="<" />
+              <el-option label="<=" value="<=" />
+              <el-option label="LIKE" value="LIKE" />
+            </el-select>
+            <el-input
+              v-model="formData.conditionValue"
+              placeholder="值"
+              :disabled="!formData.conditionField"
+              class="condition-value"
+            />
+          </div>
         </el-form-item>
 
         <el-form-item label="关联库名" prop="referencedTableSchema">
@@ -462,6 +512,24 @@ onMounted(() => {
 
 .schema-filter {
   width: 200px;
+}
+
+.condition-editor {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.condition-field {
+  flex: 1;
+}
+
+.condition-operator {
+  width: 110px;
+}
+
+.condition-value {
+  flex: 1;
 }
 
 .relation-form {

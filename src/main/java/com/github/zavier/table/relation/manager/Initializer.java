@@ -8,6 +8,7 @@ import com.github.zavier.table.relation.service.DataSourceRegistry;
 import com.github.zavier.table.relation.service.TableRelationRegistry;
 import com.github.zavier.table.relation.service.domain.Column;
 import com.github.zavier.table.relation.service.domain.ColumnRelation;
+import com.github.zavier.table.relation.service.domain.ConditionFilter;
 import com.github.zavier.table.relation.service.dto.DataSourceConfig;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
@@ -54,8 +55,9 @@ public class Initializer {
         tableRelationRegistry.clear();
         final List<TableRelation> tableRelations = tableRelationMapper.listAllTableRelation();
         tableRelations.forEach(tableRelation -> {
-            Column sourceColumn = new Column(tableRelation.tableSchema(), tableRelation.tableName(), tableRelation.columnName(), tableRelation.condition());
-            Column relatedColumn = new Column(tableRelation.referencedTableSchema(), tableRelation.referencedTableName(), tableRelation.referencedColumnName(), "");
+            Column sourceColumn = new Column(tableRelation.tableSchema(), tableRelation.tableName(), tableRelation.columnName(),
+                    ConditionFilter.of(tableRelation.conditionField(), tableRelation.conditionOperator(), tableRelation.conditionValue()));
+            Column relatedColumn = new Column(tableRelation.referencedTableSchema(), tableRelation.referencedTableName(), tableRelation.referencedColumnName(), null);
             final ColumnRelation columnRelation = new ColumnRelation(sourceColumn, relatedColumn, tableRelation.relationType());
             tableRelationRegistry.register(columnRelation);
         });
