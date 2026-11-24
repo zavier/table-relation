@@ -59,6 +59,19 @@ npm run test          # Vitest 单元测试
 
 用来管理数据库的连接（需要服务所在的机器可以连接到数据库）
 
+目前支持 **MySQL** 与 **PostgreSQL** 两种数据源，可以同时存在、混合使用：
+
+- MySQL：`数据库名` 即库名，端口默认 3306
+- PostgreSQL：`数据库名` 填数据库名，`Schema` 默认 `public`，端口默认 5432
+
+PostgreSQL 使用注意：
+
+1. 一个数据源绑定一个 schema；同一数据库的多个 schema 需要新增数据源（当前版本只支持单 schema）
+2. 跨 schema 的外键不会自动导入，需要手动维护关系
+3. 应用自身的元数据仍存放在 SQLite / MySQL 中，PostgreSQL 仅作为被查询的数据源
+
+设计说明见 [docs/specs/2026-11-24-postgresql-support-design.md](docs/specs/2026-11-24-postgresql-support-design.md)
+
 ![image-20250202150929799](images/data-source-1.png)
 
 ### 表字段关系管理
